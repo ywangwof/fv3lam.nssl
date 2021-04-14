@@ -1,0 +1,91 @@
+#!/bin/sh -l
+#SBATCH -A hpc-wof1
+#SBATCH --partition=xjet
+#SBATCH -J upp_HHHHHH
+#SBATCH --nodes=NNNNNN --ntasks-per-node=PPPPPP --cpus-per-task=TTTTTT
+#SBATCH --exclusive
+#SBATCH -t 01:20:00
+#SBATCH -o WWWDDD/fv3sar_upp_%j.out
+#SBATCH -e WWWDDD/fv3sar_upp_%j.err
+
+time1=$(date '+%s')
+echo "Job Started: $(date). Job Id:  $SLURM_JOBID"
+echo " "
+
+#-----------------------------------------------------------------------
+#
+# Load modules.
+#
+#-----------------------------------------------------------------------
+#
+
+module purge
+
+module use EEEEEE/modulefiles
+module load v8.0.0-jet
+
+numprocess=$((PPPPPP*NNNNNN))
+export APRUN="srun -n $numprocess"
+export OMP_NUM_THREADS=TTTTTT
+
+UPPEXE=EEEEEE/exec
+
+#-----------------------------------------------------------------------
+#
+# Get the cycle hour.  This is just the variable HH set in the setup.sh
+# script.
+#
+#-----------------------------------------------------------------------
+
+CDATE="DDDDDD"
+fhr="HHHHHH"
+
+cyc="00"
+tmmark="tm${cyc}"
+
+if [[ WWWDDD =~ "UKM" ]]; then
+  TITLE="fv3ukm_$CDATE"
+else
+  TITLE="fv3sar_$CDATE"
+fi
+
+#-----------------------------------------------------------------------
+#
+# Run the job
+#
+#-----------------------------------------------------------------------
+
+cd WWWDDD
+
+${APRUN} ${UPPEXE}/ncep_post < itag
+
+fhr2=$(printf "%02d" ${fhr})
+fhr3=$(printf "%03d" ${fhr})
+
+mv BGDAWP.GrbF${fhr2} ../${TITLE}.t${cyc}z.bgdawp${fhr3}.${tmmark}
+
+if [[ -f ../${TITLE}.t${cyc}z.bgdawp${fhr3}.${tmmark} ]]; then
+  touch ../${TITLE}.t${cyc}z.bgdawp${fhr3}.${tmmark}_ready
+fi
+
+#-----------------------------------------------------------------------
+#
+# Remove work directory.
+#
+#-----------------------------------------------------------------------
+
+echo "Post-processing completed for fhr = $fhr hr."
+
+time2=$(date '+%s')
+
+let diff=time2-time1
+let hour=diff/3600
+let diff=diff%3600
+let min=diff/60
+let sec=diff%60
+
+echo -n "Job   Ended: $(date). "
+printf 'Job run time:  %02d:%02d:%02d' $hour $min $sec
+echo " "
+
+exit

@@ -1,0 +1,77 @@
+#!/bin/sh -l
+#SBATCH -A hpc-wof1
+#SBATCH --partition=sjet,vjet,xjet,kjet
+#SBATCH -J fv3lam_MODE
+#SBATCH --ntasks=NPES --cpus-per-task=2
+#SBATCH --exclusive
+#SBATCH -t 05:30:00
+#SBATCH -o WWWDDD/fv3lam_MODE_%j.out
+#SBATCH -e WWWDDD/fv3lam_MODE_%j.err
+
+#set -eux
+#. /apps/lmod/lmod/init/sh
+
+module use /contrib/sutils/modulefiles
+module load sutils
+
+module load cmake/3.16.1
+setenv CMAKE_C_COMPILER mpiicc
+setenv CMAKE_CXX_COMPILER mpiicpc
+setenv CMAKE_Fortran_COMPILER mpiifort
+setenv CMAKE_Platform jet.intel
+
+module use /lfs4/HFIP/hfv3gfs/nwprod/hpc-stack/libs/modulefiles/stack
+
+module load hpc/1.1.0
+module load hpc-intel/18.0.5.274
+module load hpc-impi/2018.4.274
+
+module load jasper/2.0.22
+module load zlib/1.2.11
+module load png/1.6.35
+
+module load hdf5/1.10.6
+module load netcdf/4.7.4
+module load pio/2.5.1
+module load esmf/8_1_0_beta_snapshot_27
+
+module list
+
+time1=$(date '+%s')
+echo "Job Started: $(date). Job Id:  $SLURM_JOBID"
+echo " "
+
+RUNDIR='WWWDDD'
+
+cd $RUNDIR
+
+export MPI_TYPE_DEPTH=20
+export OMP_STACKSIZE=512M
+export ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4
+
+export OMP_NUM_THREADS=2
+export MKL_NUM_THREADS=2
+
+sed -i "/atmos_nthreads/s#[0-9]\+#$OMP_NUM_THREADS#"     model_configure
+sed -i "/ncores_per_node/s#[0-9]\+#$SLURM_CPUS_ON_NODE#" model_configure
+#sed -i "/write_groups/s/NODES2/${quilt_nodes}/" model_configure
+#sed -i "/write_tasks_per_group/s/PPN2/$SLURM_CPUS_ON_NODE/" model_configure
+
+srun -n NPES EXEPPP
+
+touch done.fv3
+
+time2=$(date '+%s')
+
+let diff=time2-time1
+let hour=diff/3600
+let diff=diff%3600
+let min=diff/60
+let sec=diff%60
+
+echo -n "Job   Ended: $(date). "
+printf 'Job run time:  %02d:%02d:%02d' $hour $min $sec
+echo " "
+
+exit
+

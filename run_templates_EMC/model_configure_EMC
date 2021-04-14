@@ -1,0 +1,58 @@
+total_member:            1
+print_esmf:              .false.
+PE_MEMBER01:             NPES
+start_year:              YYYY
+start_month:             MM
+start_day:               DD
+start_hour:              00
+start_minute:            0
+start_second:            0
+nhours_fcst:             36
+RUN_CONTINUE:            .false.
+ENS_SPS:                 .false.
+dt_atmos:                24
+cpl:                     .false.
+calendar:                'julian'
+memuse_verbose:          .false.
+atmos_nthreads:          2
+use_hyper_thread:        .false.
+ncores_per_node:         24 
+debug_affinity:          .true.
+restart_interval:        12
+output_1st_tstep_rst:    .false.
+
+quilting:                .true.
+write_groups:            NODES2
+write_tasks_per_group:   PPN2
+write_dopost:            .false.
+output_history:          .true.
+num_files:               2
+filename_base:           'dyn' 'phy'
+output_file:             'netcdf' 'netcdf'
+write_nemsioflip:        .false.
+write_fsyncflag:         .false.
+ideflate:		 0
+nbits:			 0
+ichunk2d:                -1
+jchunk2d:                -1
+ichunk3d:                -1
+jchunk3d:                -1
+kchunk3d:                -1
+
+output_grid:             'lambert_conformal'
+cen_lon:                 -97.5   # central longitude
+cen_lat:                 38.5    # central latitude
+stdlat1:                 38.5
+stdlat2:                 38.5
+nx:                      1746    # number of points along x-axis.
+ny:                      1014    # number of points along y-axis.
+lon1:                    -122.17364391    # longitude of lower-left point (in degrees)
+lat1:                    21.88588562      # latitude of lower-left point (in degrees)
+dx:                      3000.0  # x-direction grid length
+dy:                      3000.0  # y-direction grid length
+
+nfhout:                  1
+nfhmax_hf:               60
+nfhout_hf:               1
+nsout:                   -1
+

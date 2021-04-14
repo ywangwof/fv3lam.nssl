@@ -1,0 +1,80 @@
+#!/bin/bash
+#SBATCH -A smallqueue
+#SBATCH -p workq
+#SBATCH -J upp_HHHHHH
+#SBATCH -N NNNNNN -n NPES
+#SBATCH --ntasks-per-node=PPPPPP
+#SBATCH --exclusive
+#SBATCH -t 00:30:00
+#SBATCH -o WWWDDD/fv3sar_ccpp_%j.out
+#SBATCH -e WWWDDD/fv3sar_ccpp_%j.err
+
+time1=$(date '+%s')
+echo "Job Started: $(date). Job Id:  $SLURM_JOBID"
+echo " "
+
+#-----------------------------------------------------------------------
+#
+# Load modules.
+#
+#-----------------------------------------------------------------------
+#
+
+
+#export APRUN="mpirun -l -np $PBS_NP"
+export APRUN="srun -n 1"
+
+UPPEXE=EEEEEE
+
+#-----------------------------------------------------------------------
+#
+# Get the cycle hour.  This is just the variable HH set in the setup.sh
+# script.
+#
+#-----------------------------------------------------------------------
+
+CDATE="DDDDDD"
+fhr="HHHHHH"
+
+cyc="00"
+tmmark="tm${cyc}"
+
+TITLE="fv3sar_$CDATE"
+
+#-----------------------------------------------------------------------
+#
+# Run the job
+#
+#-----------------------------------------------------------------------
+
+cd WWWDDD
+
+${APRUN} ${UPPEXE}/ncep_post < itag
+
+fhr2=$(printf "%02d" ${fhr##0})
+
+mv BGDAWP.GrbF${fhr2} ../${TITLE}.t${cyc}z.bgdawp${fhr}.${tmmark}
+mv BGRD3D.GrbF${fhr2} ../${TITLE}.t${cyc}z.bgrd3d${fhr}.${tmmark}
+
+#-----------------------------------------------------------------------
+#
+# Remove work directory.
+#
+#-----------------------------------------------------------------------
+
+
+echo "Post-processing completed for fhr = $fhr hr."
+
+time2=$(date '+%s')
+
+let diff=time2-time1
+let hour=diff/3600
+let diff=diff%3600
+let min=diff/60
+let sec=diff%60
+
+echo -n "Job   Ended: $(date). "
+printf 'Job run time:  %02d:%02d:%02d' $hour $min $sec
+echo " "
+
+exit
