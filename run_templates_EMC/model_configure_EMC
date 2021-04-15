@@ -18,7 +18,7 @@ atmos_nthreads:          2
 use_hyper_thread:        .false.
 ncores_per_node:         24 
 debug_affinity:          .true.
-restart_interval:        12
+restart_interval:        0
 output_1st_tstep_rst:    .false.
 
 quilting:                .true.

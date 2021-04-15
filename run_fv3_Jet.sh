@@ -135,64 +135,48 @@ echo "     Working dir: $WORKDIR ----"
   #
   # 1.1 Try public/data directory first
   #
-#  publicdatadir="/public/data/grids/ncep/fv3sar"
-#
-#  if [ ! -f ${emc_event}/${emcdone} ]; then
-#
-#    if [[ ! -d ${emc_event} ]]; then
-#      mkdir -p ${emc_event}
-#    fi
-#
-#    currjdate=$(date +%j)
-#    curryyval=$(date +%g)
-#
-#    jdate=$(date -d "$eventdate" +%j)
-#    yyval=$(date -d "$eventdate" +%g)
-#
-#    waitmaxseconds=7200   # wait for at most 1-hour
-#    waitseconds=0;  found=0; orgdatasize=-1
-#
-#    while [[ $waitseconds -lt $waitmaxseconds ]]; do
-#
-#      if [[ $curryyval -eq $yyval && $currjdate -le $((jdate+2)) ]]; then
-#
-#        gfsdatafile="${publicdatadir}/${yyval}${jdate}0000.gfs_data.tile7.nc"
-#
-#        if [[ -f ${gfsdatafile} ]]; then
-#          gfsdatasize=$(stat --printf="%s" ${gfsdatafile})
-#
-#          filesizediff=$(( gfsdatasize - orgdatasize ))
-#
-#          if [[ $filesizediff -le 0 ]]; then
-#          #if [[ -f ${publicdatadir}/${yyval}${jdate}0000.${emcdone} ]]; then
-#            found=1
-#            break
-#          else
-#            echo "File ${gfsdatafile} is actively changing at $waitseconds seconds (${orgdatasize} -> $gfsdatasize) ..."
-#            orgdatasize=${gfsdatasize}
-#          fi
-#        else
-#          echo "Waiting for EMC datasets ${publicdatadir}/${yyval}${jdate}0000.* ($waitseconds)..."
-#        fi
-#
-#        sleep 20
-#        waitseconds=$(( waitseconds+=20 ))
-#      else
-#        #echo "$jdate, $currjdate"
-#        break         # case is older than 2 days
-#      fi
-#    done
-#
-#    if [[ $found -gt 0 ]]; then
-#      for fn in ${files[@]}; do
-#        echo "Copying $fn ....."
-#        cp -v ${publicdatadir}/${yyval}${jdate}0000.$fn ${emc_event}/$fn
-#      done
-#
-#      #touch ${emc_event}/${emcdone}
-#    fi
-#  fi
-#
+  publicdatadir="/public/data/grids/ncep/fv3sar"
+
+  if [ ! -f ${emc_event}/${emcdone} ]; then
+
+    if [[ ! -d ${emc_event} ]]; then
+      mkdir -p ${emc_event}
+    fi
+
+    currjdate=$(date +%j)
+    curryyval=$(date +%g)
+
+    jdate=$(date -d "$eventdate" +%j)
+    yyval=$(date -d "$eventdate" +%g)
+
+    waitmaxseconds=7200   # wait for at most 1-hour
+    waitseconds=0;  found=0
+
+    readyfile="${publicdatadir}/${yyval}${jdate}0000.donefile.${eventdate}00"
+    while [[ $waitseconds -lt $waitmaxseconds ]]; do
+        if [[ -f $readyfile ]]; then
+            echo "Found $readyfile"
+            found=1
+            break
+        elif [[ $curryyval -eq $yyval && $currjdate -gt $((jdate+1)) ]]; then
+            break
+        else
+            echo "Waiting for $readfile at ${eventdate} ... "
+            sleep 20
+            waitseconds=$(( waitseconds+=20 ))
+        fi
+    done
+
+    if [[ $found -gt 0 ]]; then
+      for fn in ${files[@]}; do
+        echo "Copying $fn ....."
+        cp -v ${publicdatadir}/${yyval}${jdate}0000.$fn ${emc_event}/$fn
+      done
+
+      #touch ${emc_event}/${emcdone}
+    fi
+  fi
+
   #
   # 1.2 Try the ftp server if not found in publicdatadir
   #
@@ -279,7 +263,7 @@ if [ ! -f $donefv3 ]; then
   cp ${template_dir}/model_configure_${run^^} model_configure
   cp ${template_dir}/nems.configure .
   if [[ ${run^^} =~ "EMC" ]]; then
-  cp ${template_dir}/suite_FV3_GFS_v15_thompson_mynn_lam3km.xml suite_FV3_GFS_v15_thompson_mynn.xml
+  cp ${template_dir}/suite_FV3_GFS_v15_thompson_mynn_lam3km.xml .
   elif [[ ${run^^} =~ "NSSL" ]]; then
       cp ${template_dir}/suite_FV3_RRFS_v1nssl.xml .
   else

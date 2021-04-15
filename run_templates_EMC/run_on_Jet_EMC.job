@@ -15,10 +15,6 @@ module use /contrib/sutils/modulefiles
 module load sutils
 
 module load cmake/3.16.1
-setenv CMAKE_C_COMPILER mpiicc
-setenv CMAKE_CXX_COMPILER mpiicpc
-setenv CMAKE_Fortran_COMPILER mpiifort
-setenv CMAKE_Platform jet.intel
 
 module use /lfs4/HFIP/hfv3gfs/nwprod/hpc-stack/libs/modulefiles/stack
 

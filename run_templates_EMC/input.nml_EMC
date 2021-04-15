@@ -12,7 +12,7 @@
      chksum_debug = .false.
      dycore_only = .false.
      fdiag = 1
-     ccpp_suite = 'FV3_GFS_v15_thompson_mynn'
+     ccpp_suite = 'FV3_GFS_v15_thompson_mynn_lam3km'
      avg_max_length = 3600.
 /
 

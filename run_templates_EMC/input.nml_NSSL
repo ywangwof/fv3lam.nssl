@@ -44,7 +44,7 @@
 
     a_imp = 1.0
     adjust_dry_mass = .false.
-    bc_update_interval = 1
+    bc_update_interval = 3
     beta = 0.0
     consv_am = .false.
     consv_te = 0.0
