@@ -40,7 +40,8 @@
     io_layout = 1, 1
     npx = 1749
     npy = 1039
-    npz = 64
+    npz_type  = ''
+    npz = 60
 
     a_imp = 1.0
     adjust_dry_mass = .false.

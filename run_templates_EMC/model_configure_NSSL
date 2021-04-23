@@ -7,7 +7,7 @@ start_day:               DD
 start_hour:              00
 start_minute:            0
 start_second:            0
-nhours_fcst:             36
+nhours_fcst:             TTTTTT
 RUN_CONTINUE:            .false.
 ENS_SPS:                 .false.
 dt_atmos:                40

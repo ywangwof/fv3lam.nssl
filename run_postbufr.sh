@@ -6,6 +6,7 @@ RUNDIR=$1      # $eventdir
 CDATE=$2
 sfhr=${3-0}
 tophour=${4-60}
+MODE=${5-EMC}
 
 #hr=${CDATE:8:2}
 #CDATE=${CDATE:0:8}
@@ -18,7 +19,9 @@ POSTPRD_DIR="$RUNDIR/postbufr"
 mkdir -p $POSTPRD_DIR
 
 cd $POSTPRD_DIR
+if [[ ! -f hiresw_profdat ]]; then
 cp ${FV3SARDIR}/run_fix/hiresw_conusfv3_profdat hiresw_profdat
+fi
 
 jobtmpl=${FV3SARDIR}/run_templates_EMC/exhiresw_bufr000.job
 for hr in $(seq $sfhr 1 ${tophour}); do
@@ -41,7 +44,7 @@ for hr in $(seq $sfhr 1 ${tophour}); do
 
   jobscript=${FHR_DIR}/exhiresw_bufr${fhr}.job
 
-  sed -e "s#WWWDDD#$FHR_DIR#;s#NNNNNN#${nodes1}#;s#PPPPPP#${platppn}#g;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;" ${jobtmpl} > ${jobscript}
+  sed -e "s#WWWDDD#$FHR_DIR#;s#MMMMMM#$MODE#;s#NNNNNN#${nodes1}#;s#PPPPPP#${platppn}#g;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;" ${jobtmpl} > ${jobscript}
 
   echo "Submitting $jobscript ..."
   sbatch $jobscript
@@ -52,7 +55,7 @@ cd $POSTBUFR_DIR
 hr=$((tophour+1))
 bufrtmpl=${FV3SARDIR}/run_templates_EMC/exhiresw_bufr061.job
 jobscript=$POSTBUFR_DIR/exhiresw_bufr0${hr}.job
-sed -e "s#WWWDDD#${POSTBUFR_DIR}#;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;" ${bufrtmpl} > ${jobscript}
+sed -e "s#WWWDDD#${POSTBUFR_DIR}#;s#MMMMMM#$MODE#;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;" ${bufrtmpl} > ${jobscript}
 
 echo "tophour=$tophour"
 fhr=$(printf "%03d" $tophour)

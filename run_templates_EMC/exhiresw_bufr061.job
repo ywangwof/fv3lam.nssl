@@ -1,7 +1,7 @@
 #!/bin/sh
 #SBATCH -A hpc-wof1
 #SBATCH --partition=xjet
-#SBATCH -J bufr_STNM
+#SBATCH -J bufr_STNM_MMMMMM
 #SBATCH --nodes=1 --ntasks-per-node=24
 #SBATCH --exclusive
 #SBATCH -t 02:20:00
@@ -61,11 +61,12 @@ FINALDATE=$(date -d "DDDDDD 00:00 $FHRLIM hours" +%Y-%m-%d_%H:%M:%S)
 NEST=${dom}
 MODEL=fv3
 
-if [[ WWWDDD =~ "UKM" ]]; then
-  TITLE="fv3ukm"
-else
-  TITLE="fv3sar"
-fi
+#if [[ WWWDDD =~ "UKM" ]]; then
+#  TITLE="fv3ukm"
+#else
+#  TITLE="fv3sar"
+#fi
+TITLE="fv3MMMMMM"
 
 #mkdir -p $DATA/postbufr
 cd $DATA
@@ -83,8 +84,9 @@ export tmmark=tm00
 echo FIXsar is $FIXsar
 echo profdat file name is hiresw_${RUNLOC}_profdat
 
-
-cp $FIXsar/hiresw_${RUNLOC}_profdat hiresw_profdat
+if [ ! -f hiresw_profdat ]; then
+  cp $FIXsar/hiresw_${RUNLOC}_profdat hiresw_profdat
+fi
 
 OUTTYP=netcdf
 
@@ -217,7 +219,7 @@ echo here RUNLOC $RUNLOC
 echo here MODEL $MODEL
 echo here model $model
 
-nlev=81
+nlev=60
 
 #pgmout=hireswfv3_sndp.log
 echo "${model} $nlev" > itag
@@ -278,7 +280,8 @@ echo ${COMOUT}/bufr.${NEST}${MODEL}${cyc} > ${COMOUT}/bufr.${NEST}${MODEL}${cyc}
 cd ${COMOUT}/bufr.${NEST}${MODEL}${cyc}
 
 # Tar and gzip the individual bufr files and send them to /com
-tar -czvf ../${TITLE}_DDDDDD.t${cyc}z.bufrsnd.tar.gz *
+bufrfilename=${TITLE}_DDDDDD${cyc}.bufrsnd
+tar -czvf ../${bufrfilename}.tar.gz *
 
 #files=`ls`
 #for fl in $files

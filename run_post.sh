@@ -41,6 +41,7 @@ CDATE=$2
 
 sfhr=${3-0}
 tophour=${4-60}
+MODE=${5-EMC}
 
 nodes1="2"
 numprocess="12"
@@ -159,7 +160,7 @@ EOF
     ssmi_f13.SpcCoeff.bin ssmi_f14.SpcCoeff.bin ssmi_f15.SpcCoeff.bin ssmis_f16.SpcCoeff.bin \
     ssmis_f17.SpcCoeff.bin ssmis_f18.SpcCoeff.bin ssmis_f19.SpcCoeff.bin ssmis_f20.SpcCoeff.bin \
     seviri_m10.SpcCoeff.bin imgr_mt2.SpcCoeff.bin imgr_mt1r.SpcCoeff.bin \
-    imgr_insat3d.SpcCoeff.bin abi_gr.SpcCoeff.bin abi_gr.SpcCoeff.bin )
+    imgr_insat3d.SpcCoeff.bin abi_gr.SpcCoeff.bin ahi_himawari8.SpcCoeff.bin)
 
   for fn in ${spcCoeff_files[@]}; do
     ln -sf ${CRTM_FIX}/SpcCoeff/${ENDIAN}/$fn .
@@ -170,7 +171,7 @@ EOF
       ssmi_f13.TauCoeff.bin ssmi_f14.TauCoeff.bin ssmi_f15.TauCoeff.bin ssmis_f16.TauCoeff.bin \
       ssmis_f17.TauCoeff.bin ssmis_f18.TauCoeff.bin ssmis_f19.TauCoeff.bin ssmis_f20.TauCoeff.bin \
       seviri_m10.TauCoeff.bin imgr_mt2.TauCoeff.bin imgr_mt1r.TauCoeff.bin \
-      imgr_insat3d.TauCoeff.bin abi_gr.TauCoeff.bin abi_gr.TauCoeff.bin)
+      imgr_insat3d.TauCoeff.bin abi_gr.TauCoeff.bin ahi_himawari8.TauCoeff.bin)
 
   for fn in ${tauCoeff_files[@]}; do
     ln -sf ${CRTM_FIX}/TauCoeff/ODPS/${ENDIAN}/$fn .
@@ -195,7 +196,7 @@ EOF
 #-----------------------------------------------------------------------
   jobscript=run_upp_$fhr.job
   cp ${template_job} ${jobscript}
-  sed -i -e "s#WWWDDD#${FHR_DIR}#;s#NNNNNN#${nodes1}#;s#PPPPPP#${platppn}#g;s#TTTTTT#${numthread}#g;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;" ${jobscript}
+  sed -i -e "s#WWWDDD#${FHR_DIR}#;s#MMMMMM#$MODE#g;s#NNNNNN#${nodes1}#;s#PPPPPP#${platppn}#g;s#TTTTTT#${numthread}#g;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;" ${jobscript}
 
   sbatch $jobscript
 
@@ -214,7 +215,7 @@ EOF
 
   jobscript=${FHR_DIR}/exhiresw_bufr${fhr}.job
 
-  sed -e "s#WWWDDD#$FHR_DIR#;s#NNNNNN#${nodesb}#;s#PPPPPP#${platppnb}#g;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;" ${bufrtmpl} > ${jobscript}
+  sed -e "s#WWWDDD#$FHR_DIR#;s#MMMMMM#$MODE#g;s#NNNNNN#${nodesb}#;s#PPPPPP#${platppnb}#g;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;" ${bufrtmpl} > ${jobscript}
 
   echo "Submitting $jobscript ..."
   sbatch $jobscript
@@ -224,7 +225,7 @@ cd $POSTBUFR_DIR
 hr=$((tophour+1))
 bufrtmpl=${FV3SARDIR}/run_templates_EMC/exhiresw_bufr061.job
 jobscript=$POSTBUFR_DIR/exhiresw_bufr0${hr}.job
-sed -e "s#WWWDDD#${POSTBUFR_DIR}#;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;" ${bufrtmpl} > ${jobscript}
+sed -e "s#WWWDDD#${POSTBUFR_DIR}#;s#MMMMMM#$MODE#g;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;" ${bufrtmpl} > ${jobscript}
 
 echo "tophour=$tophour"
 fhr=$(printf "%03d" $tophour)

@@ -116,7 +116,7 @@ echo "     Working dir: $WORKDIR ----"
 #-----------------------------------------------------------------------
 
   inthour=3
-  tophour=36
+  tophour=60
   echo "-- 1: download EMC data files at $(date +%m-%d_%H:%M:%S) ----"
   emc_dir="${rootdir}/emcic"   #"/fv3sar.${eventdate}/00"
 
@@ -294,7 +294,7 @@ if [ ! -f $donefv3 ]; then
   ddd=`echo ${eventdate} |cut -c 7-8`
 
   sed -i -e "/NPES/s/NPES/${npes}/;/YYYY/s/YYYY/$yyy/;/MM/s/MM/$mmm/;/DD/s/DD/$ddd/" model_configure
-  sed -i -e "s/NODES2/${quilt_nodes}/;s/PPN2/${quilt_ppn}/" model_configure
+  sed -i -e "s/NODES2/${quilt_nodes}/;s/PPN2/${quilt_ppn}/;s/TTTTTT/${tophour}/" model_configure
   sed -i -e "/NPES/s/NPES/${npes}/;/YYYY/s/YYYY/$yyy/;/MM/s/MM/$mmm/;/DD/s/DD/$ddd/" diag_table
 
   sed -i -e "/LAYOUT/s/LAYOUTX/${layout_x}/;s/LAYOUTY/${layout_y}/" input.nml
@@ -350,7 +350,7 @@ echo " "
 echo "-- 4: run post-processing at $(date +%m-%d_%H:%M:%S) ----"
 
 export FV3SARDIR="${rootdir}/fv3lam.nssl"
-${FV3SARDIR}/run_post.sh ${eventdir} ${eventdate} 0 ${tophour}
+${FV3SARDIR}/run_post.sh ${eventdir} ${eventdate} 0 ${tophour} ${run^^}
 
 echo " "
 
