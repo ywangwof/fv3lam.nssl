@@ -13,3 +13,4 @@ Users should copy the following direcotries for executables and fixed files
 * CRTM_v2.2.3_fix/
 * run_fix/
 * UPP_fix/
+* ../emcic/fv3lam_esg.grid.2021/

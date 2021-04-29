@@ -1,5 +1,4 @@
 #!/bin/bash
-#rootdir="/lfs3/projects/wof/fv3_regional"
 rootdir="/lfs4/NAGAPE/hpc-wof1/ywang/regional_fv3"
 WORKDIRDF="${rootdir}/run_dirs"
 eventdateDF=$(date +%Y%m%d)
@@ -92,11 +91,11 @@ export WORKDIR="$WORKDIR/${run^^}"
 export CYCLE="00"
 #export FIX_AM="${rootdir}/fix/fix_am"
 
-layout_x="46"
+layout_x="35"
 layout_y="28"
 #quilt_procs="72"
-quilt_nodes="4"
-quilt_ppn="17"
+quilt_nodes="2"
+quilt_ppn="14"
 
 #platppn="12"
 
@@ -161,7 +160,7 @@ echo "     Working dir: $WORKDIR ----"
         elif [[ $curryyval -eq $yyval && $currjdate -gt $((jdate+1)) ]]; then
             break
         else
-            echo "Waiting for $readfile at ${eventdate} ... "
+            echo "Waiting for $readyfile at ${eventdate} ... "
             sleep 20
             waitseconds=$(( waitseconds+=20 ))
         fi
@@ -231,26 +230,26 @@ if [ ! -f $donefv3 ]; then
   ln -s ${emc_event}/sfc_data.tile7.nc sfc_data.nc
   ln -s ${emc_event}/gfs_ctrl.nc .
 
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357_grid.tile7.halo3.nc     C3357_grid.tile7.halo3.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357_grid.tile7.halo4.nc     C3357_grid.tile7.halo4.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357_grid.tile7.halo6.nc     C3357_grid.tile7.halo6.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357_grid.tile7.nc           C3357_grid.tile7.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357_grid.tile7.halo4.nc     grid.tile7.halo4.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357_oro_data.tile7.halo0.nc C3357_oro_data.tile7.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357_oro_data.tile7.halo0.nc oro_data.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357_oro_data.tile7.halo4.nc oro_data.tile7.halo4.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357_mosaic.nc               grid_spec.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo3.nc     C3359_grid.tile7.halo3.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo4.nc     C3359_grid.tile7.halo4.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo6.nc     C3359_grid.tile7.halo6.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.nc           C3359_grid.tile7.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo4.nc     grid.tile7.halo4.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_oro_data.tile7.halo0.nc C3359_oro_data.tile7.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_oro_data.tile7.halo0.nc oro_data.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_oro_data.tile7.halo4.nc oro_data.tile7.halo4.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_mosaic.nc               grid_spec.nc
 
   cd ..
 
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357.facsf.tile7.nc                 C3357.facsf.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357.snowfree_albedo.tile7.nc       C3357.snowfree_albedo.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357.substrate_temperature.tile7.nc C3357.substrate_temperature.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357.vegetation_greenness.tile7.nc  C3357.vegetation_greenness.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357.vegetation_type.tile7.nc       C3357.vegetation_type.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357.soil_type.tile7.nc             C3357.soil_type.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357.slope_type.tile7.nc            C3357.slope_type.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid/C3357.maximum_snow_albedo.tile7.nc   C3357.maximum_snow_albedo.tile1.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.facsf.tile7.nc                 C3359.facsf.tile1.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.snowfree_albedo.tile7.nc       C3359.snowfree_albedo.tile1.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.substrate_temperature.tile7.nc C3359.substrate_temperature.tile1.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.vegetation_greenness.tile7.nc  C3359.vegetation_greenness.tile1.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.vegetation_type.tile7.nc       C3359.vegetation_type.tile1.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.soil_type.tile7.nc             C3359.soil_type.tile1.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.slope_type.tile7.nc            C3359.slope_type.tile1.nc
+  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.maximum_snow_albedo.tile7.nc   C3359.maximum_snow_albedo.tile1.nc
 
   mkdir -p RESTART
 
@@ -265,7 +264,7 @@ if [ ! -f $donefv3 ]; then
   if [[ ${run^^} =~ "EMC" ]]; then
   cp ${template_dir}/suite_FV3_GFS_v15_thompson_mynn_lam3km.xml .
   elif [[ ${run^^} =~ "NSSL" ]]; then
-      cp ${template_dir}/suite_FV3_RRFS_v1nssl.xml .
+      cp ${template_dir}/suite_FV3_RRFS_v1nssl_lsmnoah.xml .
   else
       echo "ERROR: unsupport run mode."
       exit 1

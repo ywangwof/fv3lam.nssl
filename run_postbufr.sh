@@ -24,6 +24,7 @@ cp ${FV3SARDIR}/run_fix/hiresw_conusfv3_profdat hiresw_profdat
 fi
 
 jobtmpl=${FV3SARDIR}/run_templates_EMC/exhiresw_bufr000.job
+declare -a waitlist
 for hr in $(seq $sfhr 1 ${tophour}); do
   fhr=$(printf "%03d" $hr)
 
@@ -48,6 +49,7 @@ for hr in $(seq $sfhr 1 ${tophour}); do
 
   echo "Submitting $jobscript ..."
   sbatch $jobscript
+  waitlist+=($fhr)
 done
 
 POSTBUFR_DIR="$RUNDIR/postbufr"
@@ -57,14 +59,24 @@ bufrtmpl=${FV3SARDIR}/run_templates_EMC/exhiresw_bufr061.job
 jobscript=$POSTBUFR_DIR/exhiresw_bufr0${hr}.job
 sed -e "s#WWWDDD#${POSTBUFR_DIR}#;s#MMMMMM#$MODE#;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;" ${bufrtmpl} > ${jobscript}
 
-echo "tophour=$tophour"
-fhr=$(printf "%03d" $tophour)
-donefile=$POSTBUFR_DIR/sndpostdone${fhr}.tm00
 wtime=0
-while [[ ! -f ${donefile} ]]; do
-  sleep 20
-  wtime=$(( wtime += 10 ))
-  echo "Waiting ($wtime seconds) for ${donefile}"
+nowait=${#waitlist[@]}
+while true; do
+    for fhr in ${waitlist[@]}; do
+        donefile=$POSTBUFR_DIR/sndpostdone${fhr}.tm00
+
+        if [[ -e $donefile ]]; then
+            waitlist=("${waitlist[@]/$fhr}")
+            nowait=$((nowait-1))
+        else
+            echo "Waiting ($wtime seconds) for ${donefile}"
+        fi
+    done
+    if [[ ${nowait} -eq 0 ]]; then
+        break
+    fi
+    sleep 20
+    wtime=$(( wtime += 20 ))
 done
 
 echo "Submitting $jobscript ..."

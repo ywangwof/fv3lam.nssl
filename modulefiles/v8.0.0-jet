@@ -39,6 +39,9 @@ module load g2tmpl/v1.6.0
 module load wrfio/v1.1.1
 module load hdf5_parallel/1.10.6
 module load netcdf_parallel/4.7.4
+module load szip/2.1
+module load hdf5/1.8.9
+module load netcdf4/4.2.1.1
 
 module load bufr
 

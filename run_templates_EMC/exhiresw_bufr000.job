@@ -189,9 +189,10 @@ export FORT11="itag"
 #startmsg
 echo ${APRUNC} $EXECfv3/hireswfv3_bufr.x
 ${APRUNC} $EXECfv3/hireswfv3_bufr.x  > pgmout.log_${fhrstr} 2>&1
-#export err=$?;err_chk
+export err=$?
 
-echo DONE $fhr at `date`
-
-#mv $datadir/profilm.c1.${tmmark} $datadir/profilm.c1.${tmmark}.f${fhr}
-echo "done" > $DATA/sndpostdone${fhrstr}.${tmmark}
+if [[ $err -eq 0 ]]; then
+    echo DONE $fhr at `date`
+    #mv $datadir/profilm.c1.${tmmark} $datadir/profilm.c1.${tmmark}.f${fhr}
+    echo "done" > $DATA/sndpostdone${fhrstr}.${tmmark}
+fi
