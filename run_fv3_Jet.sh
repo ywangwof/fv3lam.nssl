@@ -383,26 +383,45 @@ if [ ! -f $donefv3 ]; then
   ln -s gfs_data.tile7.halo0.nc gfs_data.nc
   ln -s sfc_data.tile7.halo0.nc sfc_data.nc
 
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo3.nc     C3359_grid.tile7.halo3.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo4.nc     C3359_grid.tile7.halo4.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo6.nc     C3359_grid.tile7.halo6.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.nc           C3359_grid.tile7.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo4.nc     grid.tile7.halo4.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_oro_data.tile7.halo0.nc C3359_oro_data.tile7.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_oro_data.tile7.halo0.nc oro_data.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_oro_data.tile7.halo4.nc oro_data.tile7.halo4.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_mosaic.nc               grid_spec.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo3.nc     C3359_grid.tile7.halo3.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo4.nc     C3359_grid.tile7.halo4.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo6.nc     C3359_grid.tile7.halo6.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.nc           C3359_grid.tile7.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo4.nc     grid.tile7.halo4.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_oro_data.tile7.halo0.nc C3359_oro_data.tile7.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_oro_data.tile7.halo0.nc oro_data.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_oro_data.tile7.halo4.nc oro_data.tile7.halo4.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_mosaic.nc               grid_spec.nc
+
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_grid.tile7.halo3.nc     C3359_grid.tile7.halo3.nc
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_grid.tile7.halo4.nc     C3359_grid.tile7.halo4.nc
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_grid.tile7.halo6.nc     C3359_grid.tile7.halo6.nc
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_grid.tile7.nc           C3359_grid.tile7.nc
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_grid.tile7.halo4.nc     grid.tile7.halo4.nc
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_oro_data.tile7.halo0.nc C3359_oro_data.tile7.nc
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_oro_data.tile7.halo0.nc oro_data.nc
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_oro_data.tile7.halo4.nc oro_data.tile7.halo4.nc
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_mosaic.halo4.nc         grid_spec.nc
 
   cd ..
 
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.facsf.tile7.nc                 C3359.facsf.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.snowfree_albedo.tile7.nc       C3359.snowfree_albedo.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.substrate_temperature.tile7.nc C3359.substrate_temperature.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.vegetation_greenness.tile7.nc  C3359.vegetation_greenness.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.vegetation_type.tile7.nc       C3359.vegetation_type.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.soil_type.tile7.nc             C3359.soil_type.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.slope_type.tile7.nc            C3359.slope_type.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.maximum_snow_albedo.tile7.nc   C3359.maximum_snow_albedo.tile1.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.facsf.tile7.nc                 C3359.facsf.tile1.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.snowfree_albedo.tile7.nc       C3359.snowfree_albedo.tile1.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.substrate_temperature.tile7.nc C3359.substrate_temperature.tile1.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.vegetation_greenness.tile7.nc  C3359.vegetation_greenness.tile1.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.vegetation_type.tile7.nc       C3359.vegetation_type.tile1.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.soil_type.tile7.nc             C3359.soil_type.tile1.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.slope_type.tile7.nc            C3359.slope_type.tile1.nc
+  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.maximum_snow_albedo.tile7.nc   C3359.maximum_snow_albedo.tile1.nc
+
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.facsf.tile7.nc                 C3359.facsf.tile1.nc
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.snowfree_albedo.tile7.nc       C3359.snowfree_albedo.tile1.nc
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.substrate_temperature.tile7.nc C3359.substrate_temperature.tile1.nc
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.vegetation_greenness.tile7.nc  C3359.vegetation_greenness.tile1.nc
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.vegetation_type.tile7.nc       C3359.vegetation_type.tile1.nc
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.soil_type.tile7.nc             C3359.soil_type.tile1.nc
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.slope_type.tile7.nc            C3359.slope_type.tile1.nc
+  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.maximum_snow_albedo.tile7.nc   C3359.maximum_snow_albedo.tile1.nc
 
   mkdir -p RESTART
 
