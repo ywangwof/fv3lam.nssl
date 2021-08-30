@@ -43,7 +43,7 @@ export eventdate="$eventdateDF"
 
 show=0
 verb=0
-run="gfs"
+run="nssl"
 #-----------------------------------------------------------------------
 #
 # Handle command line arguments
@@ -108,105 +108,105 @@ echo "---- Jobs started at $(date +%m-%d_%H:%M:%S) for Event: $eventdate"
 echo "     Working dir: $WORKDIR ----"
 #usage
 
+##-----------------------------------------------------------------------
+##
+## 1. Download EMC IC/BC datasets
+##
+##-----------------------------------------------------------------------
+#
+#  inthour=3
+#  tophour=60
+#  echo "-- 1: download EMC data files at $(date +%m-%d_%H:%M:%S) ----"
+#  emc_dir="${rootdir}/emcic"   #"/fv3sar.${eventdate}/00"
+#
+#  cd ${emc_dir}
+#
+#  emc_event="${emc_dir}/fv3lam.${eventdate}/${CYCLE}"
+#  emcdone="donefile.${eventdate}${CYCLE}"
+#
+#  files=(gfs_ctrl.nc gfs_data.tile7.nc sfc_data.tile7.nc)
+#  for hr in $(seq 0 ${inthour} ${tophour}); do
+#    fhr=$(printf "%03d" $hr)
+#    files+=(gfs_bndy.tile7.${fhr}.nc)
+#  done
+#  files+=(${emcdone})
+#
+#  #
+#  # 1.1 Try public/data directory first
+#  #
+#  publicdatadir="/public/data/grids/ncep/fv3sar"
+#
+#  if [ ! -f ${emc_event}/${emcdone} ]; then
+#
+#    if [[ ! -d ${emc_event} ]]; then
+#      mkdir -p ${emc_event}
+#    fi
+#
+#    currjdate=$(date +%j)
+#    curryyval=$(date +%g)
+#
+#    jdate=$(date -d "$eventdate" +%j)
+#    yyval=$(date -d "$eventdate" +%g)
+#
+#    waitmaxseconds=7200   # wait for at most 1-hour
+#    waitseconds=0;  found=0
+#
+#    readyfile="${publicdatadir}/${yyval}${jdate}0000.donefile.${eventdate}00"
+#    while [[ $waitseconds -lt $waitmaxseconds ]]; do
+#        if [[ -f $readyfile ]]; then
+#            echo "Found $readyfile"
+#            found=1
+#            break
+#        elif [[ $curryyval -eq $yyval && $currjdate -gt $((jdate+1)) ]]; then
+#            break
+#        else
+#            echo "Waiting for $readyfile at ${eventdate} ... "
+#            sleep 20
+#            waitseconds=$(( waitseconds+=20 ))
+#        fi
+#    done
+#
+#    if [[ $found -gt 0 ]]; then
+#      for fn in ${files[@]}; do
+#        echo "Copying $fn ....."
+#        cp -v ${publicdatadir}/${yyval}${jdate}0000.$fn ${emc_event}/$fn
+#      done
+#
+#      #touch ${emc_event}/${emcdone}
+#    fi
+#  fi
+#
+#  #
+#  # 1.2 Try the ftp server if not found in publicdatadir
+#  #
+#  #emcurl="ftp://ftp.emc.ncep.noaa.gov/mmb/mmbpll/fv3sar/fv3sar.${eventdate}/${CYCLE}"
+#  emcurl="ftp://ftp.emc.ncep.noaa.gov/mmb/mmbpll/fv3lam/fv3lam.${eventdate}/${CYCLE}"
+#
+#  if [ ! -f ${emc_event}/${emcdone} ]; then
+#
+#    while true; do
+#
+#      wget -m -nH --cut-dirs=3 ${emcurl}/${emcdone}
+#
+#      if [[ $? -eq 0 ]]; then
+#        break
+#      else
+#        #echo "Waiting for EMC datasets ..."
+#        sleep 10
+#      fi
+#    done
+#
+#    for fn in ${files[@]}; do
+#      echo "Downloading $fn ....."
+#      wget -m -nH --cut-dirs=3 ${emcurl}/$fn > /dev/null 2>&1
+#    done
+#  fi
+#
+#echo " "
+
 #-----------------------------------------------------------------------
 #
-# 1. Download EMC IC/BC datasets
-#
-#-----------------------------------------------------------------------
-
-  inthour=3
-  tophour=60
-  echo "-- 1: download EMC data files at $(date +%m-%d_%H:%M:%S) ----"
-  emc_dir="${rootdir}/emcic"   #"/fv3sar.${eventdate}/00"
-
-  cd ${emc_dir}
-
-  emc_event="${emc_dir}/fv3lam.${eventdate}/${CYCLE}"
-  emcdone="donefile.${eventdate}${CYCLE}"
-
-  files=(gfs_ctrl.nc gfs_data.tile7.nc sfc_data.tile7.nc)
-  for hr in $(seq 0 ${inthour} ${tophour}); do
-    fhr=$(printf "%03d" $hr)
-    files+=(gfs_bndy.tile7.${fhr}.nc)
-  done
-  files+=(${emcdone})
-
-  #
-  # 1.1 Try public/data directory first
-  #
-  publicdatadir="/public/data/grids/ncep/fv3sar"
-
-  if [ ! -f ${emc_event}/${emcdone} ]; then
-
-    if [[ ! -d ${emc_event} ]]; then
-      mkdir -p ${emc_event}
-    fi
-
-    currjdate=$(date +%j)
-    curryyval=$(date +%g)
-
-    jdate=$(date -d "$eventdate" +%j)
-    yyval=$(date -d "$eventdate" +%g)
-
-    waitmaxseconds=7200   # wait for at most 1-hour
-    waitseconds=0;  found=0
-
-    readyfile="${publicdatadir}/${yyval}${jdate}0000.donefile.${eventdate}00"
-    while [[ $waitseconds -lt $waitmaxseconds ]]; do
-        if [[ -f $readyfile ]]; then
-            echo "Found $readyfile"
-            found=1
-            break
-        elif [[ $curryyval -eq $yyval && $currjdate -gt $((jdate+1)) ]]; then
-            break
-        else
-            echo "Waiting for $readyfile at ${eventdate} ... "
-            sleep 20
-            waitseconds=$(( waitseconds+=20 ))
-        fi
-    done
-
-    if [[ $found -gt 0 ]]; then
-      for fn in ${files[@]}; do
-        echo "Copying $fn ....."
-        cp -v ${publicdatadir}/${yyval}${jdate}0000.$fn ${emc_event}/$fn
-      done
-
-      #touch ${emc_event}/${emcdone}
-    fi
-  fi
-
-  #
-  # 1.2 Try the ftp server if not found in publicdatadir
-  #
-  #emcurl="ftp://ftp.emc.ncep.noaa.gov/mmb/mmbpll/fv3sar/fv3sar.${eventdate}/${CYCLE}"
-  emcurl="ftp://ftp.emc.ncep.noaa.gov/mmb/mmbpll/fv3lam/fv3lam.${eventdate}/${CYCLE}"
-
-  if [ ! -f ${emc_event}/${emcdone} ]; then
-
-    while true; do
-
-      wget -m -nH --cut-dirs=3 ${emcurl}/${emcdone}
-
-      if [[ $? -eq 0 ]]; then
-        break
-      else
-        #echo "Waiting for EMC datasets ..."
-        sleep 10
-      fi
-    done
-
-    for fn in ${files[@]}; do
-      echo "Downloading $fn ....."
-      wget -m -nH --cut-dirs=3 ${emcurl}/$fn > /dev/null 2>&1
-    done
-  fi
-
-echo " "
-
-#-----------------------------------------------------------------------
-#
-# 2. Prepare working directories
+# 0. Prepare working directories
 #
 #-----------------------------------------------------------------------
 
@@ -215,20 +215,173 @@ if [[ ! -r ${eventdir} ]]; then
   mkdir -p ${eventdir}
 fi
 
+cd ${eventdir}
+
+emc_dir="${rootdir}/emcic"   #"/fv3sar.${eventdate}/00"
+template_dir="${rootdir}/fv3lam.nssl/run_templates_EMC"
+
+intvhour=3
+tophour=60
+numhours=$(( tophour/intvhour ))
+
+
+currsec=$(date +%s)
+run_sec=$(date -d "$eventdate ${CYCLE}:00:00" +%s)
+
+diffhour=$(( (currsec-run_set)/3600 ))
+
+##-----------------------------------------------------------------------
+##
+## 1. Prepare IC/BC datasets
+##
+##-----------------------------------------------------------------------
+
+EXEDDD="$rootdir/fv3lam.nssl/exec"
+
+doneics="${eventdir}/INPUT/done.ics"
+if [[ ! -f $doneics ]]; then
+
+    fv3grib2_dir="/public/data/grids/gfs/anl/netcdf"
+    fv3grib2_head=$(date -d "${eventdate} ${CYCLE}:00:00" +%y%j%H%M)
+    expectedsize=13000000000
+
+    if [[ ! -e "${eventdir}/INPUT/tmp_ICS" ]]; then
+        mkdir -p INPUT/tmp_ICS
+    fi
+    cd INPUT/tmp_ICS
+
+    #
+    # Wait for atmanl file
+    #
+    gfsfile="$fv3grib2_dir/${fv3grib2_head}.gfs.t${CYCLE}z.atmanl.nc"
+    echo "Waiting for $gfsfile ...."
+    while [[ ! -e $gfsfile ]]; do
+        sleep 10
+    done
+
+    gfssize=$(stat -c %s $(realpath $gfsfile))
+    while [[ $gfssize -lt $expectedsize ]]; do
+        echo "Waiting for $gfsfile ($gfssize) ...."
+        sleep 10
+        gfssize=$(stat -c %s $(realpath $gfsfile))
+    done
+
+    #
+    # Wait for sfcanl file
+    #
+    sfcfile="$fv3grib2_dir/${fv3grib2_head}.gfs.t${CYCLE}z.sfcanl.nc"
+    expectedsize=340000000
+
+    echo "Waiting for $sfcfile ...."
+    while [[ ! -e $sfcfile ]]; do
+        sleep 10
+    done
+
+    sfcsize=$(stat -c %s $(realpath $sfcfile))
+    while [[ $sfcsize -lt $expectedsize ]]; do
+        echo "Waiting for $sfcfile ($sfcsize) ...."
+        sleep 10
+        sfcsize=$(stat -c %s $(realpath $sfcfile))
+    done
+
+    #
+    # Run make_ics
+    #
+    # NOTE: cannot run on sjet
+    #
+    if [[ $diffhour -lt 2 ]]; then
+      sleep 20
+    fi
+
+    jobscript=run_ics_$eventdate${CYCLE}.slurm
+    cp ${template_dir}/make_ics.slurm ${jobscript}
+    sed -i -e "/WWWDDD/s#WWWDDD#$eventdir/INPUT#;s#EXEDDD#$EXEDDD#;s#DATDDD#${eventdate}${CYCLE}#g;s#DDDHHH#${eventdate:4:4}#g" ${jobscript}
+
+    echo "sbatch $jobscript"
+    sbatch $jobscript
+fi
+
+cd ${eventdir}
+
+donelbcs="${eventdir}/INPUT/done.lbcs"
+if [[ ! -f $donelbcs ]]; then
+
+    fv3grib2_dir="/public/data/grids/gfs/0p25deg/grib2"
+    fv3grib2_head=$(date -d "${eventdate} ${CYCLE}:00:00" +%y%j%H)
+    expectedsize=700000000
+
+    for (( i=intvhour; i<=tophour; i+=intvhour )); do
+
+        cd $eventdir
+
+        fhr2d=$(printf "%02d" "${i}" )
+        fhr3d=$(printf "%03d" "${i}" )
+
+        gfsfile="$fv3grib2_dir/${fv3grib2_head}0000${fhr2d}"
+
+        echo "Waiting for $gfsfile ...."
+        while [[ ! -e $gfsfile ]]; do
+            sleep 10
+        done
+
+        gfssize=$(stat -c %s $(realpath $gfsfile))
+        while [[ $gfssize -lt $expectedsize ]]; do
+            echo "Waiting for $gfsfile ($gfssize) ...."
+            sleep 10
+            gfssize=$(stat -c %s $(realpath $gfsfile))
+        done
+
+        if [[ $diffhour -lt 2 ]]; then
+          sleep 20
+        fi
+
+        if [[ ! -e "${eventdir}/INPUT/tmp_LBCS_${fhr3d}" ]]; then
+            mkdir -p INPUT/tmp_LBCS_${fhr3d}
+        fi
+        cd INPUT/tmp_LBCS_${fhr3d}
+
+        jobscript=run_lbcs_$eventdate${CYCLE}_${fhr3d}.slurm
+        cp ${template_dir}/make_lbcs.slurm ${jobscript}
+        sed -i -e "/WWWDDD/s#WWWDDD#$eventdir/INPUT#;s#EXEDDD#$EXEDDD#g;s#DATDDD#${eventdate}${CYCLE}#g;s#HHHNNN#${i}#g;s#DDDHHH#${fhr3d}#g" ${jobscript}
+
+        echo "sbatch $jobscript"
+        sbatch $jobscript
+    done
+
+fi
+
+echo "Waiting for ${doneics} ..."
+while [[ ! -f ${doneics} ]]; do
+  sleep 10
+  #echo "Waiting for ${doneics} ..."
+done
+ls -l ${doneics}
+
+donelbcs_size=$(ls -1 ${eventdir}/INPUT/done.lbcs_* 2>/dev/null | wc -l)
+while [ ${donelbcs_size} -lt ${numhours} ]; do
+  echo "Waiting for ${donelbcs}_* (found ${donelbcs_size}) ...."
+  sleep 10
+done
+touch ${donelbcs}
+
+
+##-----------------------------------------------------------------------
+##
+## 2. FV3 forecast directory
+##
+##-----------------------------------------------------------------------
+
+cd ${eventdir}
+
 donefv3="$eventdir/done.fv3"
 
 if [ ! -f $donefv3 ]; then
 
   echo "-- 2: prepare working directory for FV3SAR at $(date +%m-%d_%H:%M:%S) ----"
 
-  cd ${eventdir}
-  mkdir -p INPUT
-
   cd INPUT
-  ln -s ${emc_event}/gfs_bndy.tile7.*.nc .
-  ln -s ${emc_event}/gfs_data.tile7.nc gfs_data.nc
-  ln -s ${emc_event}/sfc_data.tile7.nc sfc_data.nc
-  ln -s ${emc_event}/gfs_ctrl.nc .
+  ln -s gfs_data.tile7.halo0.nc gfs_data.nc
+  ln -s sfc_data.tile7.halo0.nc sfc_data.nc
 
   ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo3.nc     C3359_grid.tile7.halo3.nc
   ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo4.nc     C3359_grid.tile7.halo4.nc
@@ -252,8 +405,6 @@ if [ ! -f $donefv3 ]; then
   ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.maximum_snow_albedo.tile7.nc   C3359.maximum_snow_albedo.tile1.nc
 
   mkdir -p RESTART
-
-  template_dir="${rootdir}/fv3lam.nssl/run_templates_EMC"
 
   cp ${template_dir}/data_table  .
   cp ${template_dir}/field_table_${run^^}     field_table
