@@ -228,7 +228,7 @@ numhours=$(( tophour/intvhour ))
 currsec=$(date +%s)
 run_sec=$(date -d "$eventdate ${CYCLE}:00:00" +%s)
 
-diffhour=$(( (currsec-run_set)/3600 ))
+diffhour=$(( (currsec-run_sec)/3600 ))
 
 ##-----------------------------------------------------------------------
 ##
