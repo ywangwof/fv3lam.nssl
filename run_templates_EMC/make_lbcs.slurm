@@ -12,7 +12,7 @@ nprocs=48
 APRUN="mpiexec -np $nprocs"
 exec_fp="EXEDDD/chgres_cube"
 
-fix_lam="/lfs4/NAGAPE/hpc-wof1/ywang/regional_fv3/emcic/fv3lam_esg.fixed"
+fix_lam="/lfs4/NAGAPE/hpc-wof1/ywang/regional_fv3/fv3lam.nssl/fix_lam"
 #
 #-----------------------------------------------------------------------
 #
@@ -40,7 +40,7 @@ EXTRN_MDL_CDATE="DATDDD"
 #-----------------------------------------------------------------------
 #
 
-fv3grib2_dir="/public/data/grids/gfs/0p25deg/grib2"
+fv3grib2_dir="GFS_INPUT_DIR"
 fv3grib2_head=$(date -d "${EXTRN_MDL_CDATE:0:8} ${EXTRN_MDL_CDATE:8:2}:00:00" +%y%j%H)
 
 #for (( i=${intvlhr}; i<=${numhrs}; i+=${intvlhr} )); do
@@ -83,21 +83,19 @@ fv3grib2_head=$(date -d "${EXTRN_MDL_CDATE:0:8} ${EXTRN_MDL_CDATE:8:2}:00:00" +%
     cycle_mon = $((10#${mm}))
     data_dir_input_grid = '${fv3grib2_dir}'
     external_model = 'GFS'
-    fix_dir_input_grid = '/lfs4/HFIP/hfv3gfs/glopara/git/fv3gfs/fix/fix_am'
     fix_dir_target_grid = '${fix_lam}'
     grib2_file_input_grid = '${fn_grib2}'
-    halo_blend = 10
+    halo_blend = 20
     halo_bndy = 4
     input_type = 'grib2'
     mosaic_file_target_grid = '${fix_lam}/C3359_mosaic.halo4.nc'
     orog_dir_target_grid = '${fix_lam}'
     orog_files_target_grid = 'C3359_oro_data.tile7.halo4.nc'
     regional = 2
-    thomp_mp_climo_file = '${fix_lam}/Thompson_MP_MONTHLY_CLIMO.nc'
     tracers = ''
     tracers_input = ''
     varmap_file = '${fix_lam}/GFSphys_var_map.txt'
-    vcoord_file_target_grid = '${fix_lam}/global_hyblev.l65.txt'
+    vcoord_file_target_grid = '${fix_lam}/global_hyblev_fcst_RRFSL65.txt'
 /
 EOF
 

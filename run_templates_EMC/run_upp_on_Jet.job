@@ -19,16 +19,21 @@ echo " "
 #-----------------------------------------------------------------------
 #
 
-module purge
-
-module use EEEEEE/modulefiles
-module load v8.0.0-jet
-
 numprocess=$((PPPPPP*NNNNNN))
 export APRUN="srun -n $numprocess"
 export OMP_NUM_THREADS=TTTTTT
 
 UPPEXE=EEEEEE/exec
+
+#-----------------------------------------------------------------------
+#
+# Run the job
+#
+#-----------------------------------------------------------------------
+
+cd WWWDDD
+
+${APRUN} ${UPPEXE}/upp.x < itag
 
 #-----------------------------------------------------------------------
 #
@@ -48,25 +53,37 @@ tmmark="grib2"
 #else
 #  TITLE="fv3sar_$CDATE"
 #fi
-TITLE="fv3MMMMMM_$CDATE"
-
-#-----------------------------------------------------------------------
-#
-# Run the job
-#
-#-----------------------------------------------------------------------
-
-cd WWWDDD
-
-${APRUN} ${UPPEXE}/ncep_post < itag
+NET="fv3MMMMMM_${CDATE}"
 
 fhr2=$(printf "%02d" ${fhr})
 fhr3=$(printf "%03d" ${fhr})
 
-gribfilename=${TITLE}${cyc}f${fhr3}.${tmmark}
+gribfilename=${NET}${cyc}f${fhr3}.${tmmark}
 mv BGDAWP.GrbF${fhr2} ../${gribfilename}
 
+# extract the output fields for the testbed
+#bgdawp="PRSLEV.GrbF${fhr2}"
+#TESTBED_FIELDS_FN="./testbed_fields_bgdawp.txt"
+#bgsfc=../${NET}.t${cyc}z.bgsfcf${fhr3}.${tmmark}
+#wgrib2="/lfs4/HFIP/hfv3gfs/nwprod/NCEPLIBS/exec/grib_util.v1.1.1/wgrib2"
+#
+#touch ${bgsfc}
+#if [[ ! -z ${TESTBED_FIELDS_FN} ]]; then
+#    if [[ -f ${TESTBED_FIELDS_FN} ]]; then
+#        ${wgrib2} ${bgdawp} | grep -F -f ${TESTBED_FIELDS_FN} | ${wgrib2} -i -grib ${bgsfc} ${bgdawp}
+#    else
+#        echo "${FIX_UPP}/${TESTBED_FIELDS_FN} not found"
+#    fi
+#fi
+#
+#gribfilename=${NET}.t${cyc}z.prsf${fhr3}.${tmmark}
+#mv PRSLEV.GrbF${fhr2} ../${gribfilename}
+#
+#gribfilename=${NET}.t${cyc}z.natf${fhr3}.${tmmark}
+#mv NATLEV.GrbF${fhr2} ../${gribfilename}
+
 if [[ -f ../${gribfilename} ]]; then
+  #touch ../${NET}.t${cyc}z.postf${fhr3}.${tmmark}_ready
   touch ../${gribfilename}_ready
 fi
 

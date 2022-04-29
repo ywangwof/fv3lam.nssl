@@ -1,3 +1,5 @@
+
+
 #!/bin/sh -l
 
 FV3SARDIR=${FV3SARDIR-$(pwd)}  #"/lfs3/projects/hpc-wof1/ywang/regional_fv3/fv3sar.mine"
@@ -62,7 +64,7 @@ if [[ ! -r ${POSTBUFR_DIR} ]]; then
 fi
 
 cd $POSTBUFR_DIR
-cp ${FV3SARDIR}/run_fix/hiresw_conusfv3_profdat hiresw_profdat
+cp ${FV3SARDIR}/fix_am/hiresw_conusfv3_profdat hiresw_profdat
 bufrtmpl=${FV3SARDIR}/run_templates_EMC/exhiresw_bufr000.job
 
 #-----------------------------------------------------------------------
@@ -119,21 +121,23 @@ for hr in $(seq $sfhr 1 ${tophour}); do
 
 
   POST_TIME=$( date -d "${CDATE} $hr hours" +%Y%m%d%H%M )
-  POST_YYYY=${POST_TIME:0:4}
-  POST_MM=${POST_TIME:4:2}
-  POST_DD=${POST_TIME:6:2}
-  POST_HH=${POST_TIME:8:2}
+  post_yyyy=${POST_TIME:0:4}
+  post_mm=${POST_TIME:4:2}
+  post_dd=${POST_TIME:6:2}
+  post_hh=${POST_TIME:8:2}
 
   cat > itag <<EOF
-${dyn_file}
-netcdf
-grib2
-${POST_YYYY}-${POST_MM}-${POST_DD}_${POST_HH}:00:00
-FV3R
-${phy_file}
+&model_inputs
+    fileName='${dyn_file}'
+    IOFORM='netcdf'
+    grib='grib2'
+    DateStr='${post_yyyy}-${post_mm}-${post_dd}_${post_hh}:00:00'
+    MODELNAME='FV3R'
+    fileNameFlux='${phy_file}'
+/
 
 &NAMPGB
-  KPO=6,PO=1000.,925.,850.,700.,500.,250.,
+    KPO=6,PO=1000.,925.,850.,700.,500.,250.,
 /
 EOF
 
@@ -146,9 +150,10 @@ EOF
 #-----------------------------------------------------------------------
 
   ln -sf $UPPFIX/nam_micro_lookup.dat ./eta_micro_lookup.dat
-  #ln -s $UPPFIX/postxconfig-NT-fv3sar.txt ./postxconfig-NT.txt
-  ln -sf $UPPFIX/postxconfig-NT-fv3sar-hwt2019.txt ./postxconfig-NT.txt
-  ln -sf $UPPFIX/params_grib2_tbl_new ./params_grib2_tbl_new
+  #ln -sf $UPPFIX/postxconfig-NT-fv3sar-hwt2019.txt ./postxconfig-NT.txt
+  ln -sf $UPPFIX/postxconfig-NT-fv3lam_2022.txt ./postxconfig-NT.txt
+  ln -sf $UPPFIX/params_grib2_tbl_2022 ./params_grib2_tbl_new
+  ln -sf $UPPFIX/testbed_fields_bgdawp.txt ./testbed_fields_bgdawp.txt
 
 #-----------------------------------------------------------------------
 #
@@ -225,9 +230,10 @@ done
 
 cd $POSTBUFR_DIR
 hr=$((tophour+1))
+nlevs=65
 bufrtmpl=${FV3SARDIR}/run_templates_EMC/exhiresw_bufr061.job
 jobscript=$POSTBUFR_DIR/exhiresw_bufr0${hr}.job
-sed -e "s#WWWDDD#${POSTBUFR_DIR}#;s#MMMMMM#$MODE#g;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;" ${bufrtmpl} > ${jobscript}
+sed -e "s#WWWDDD#${POSTBUFR_DIR}#;s#MMMMMM#$MODE#g;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;s#NNNLEV#${nlevs}#;" ${bufrtmpl} > ${jobscript}
 
 wtime=0
 nowait=${#waitlist[@]}
@@ -263,4 +269,3 @@ echo "Submitting $jobscript ..."
 sbatch $jobscript
 
 exit 0
-

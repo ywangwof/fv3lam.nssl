@@ -20,7 +20,7 @@ mkdir -p $POSTPRD_DIR
 
 cd $POSTPRD_DIR
 if [[ ! -f hiresw_profdat ]]; then
-cp ${FV3SARDIR}/run_fix/hiresw_conusfv3_profdat hiresw_profdat
+    cp ${FV3SARDIR}/fix_am/hiresw_conusfv3_profdat hiresw_profdat
 fi
 
 jobtmpl=${FV3SARDIR}/run_templates_EMC/exhiresw_bufr000.job

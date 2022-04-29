@@ -12,18 +12,6 @@ time1=$(date '+%s')
 echo "Job Started: $(date). Job Id:  $SLURM_JOBID"
 echo " "
 
-#-----------------------------------------------------------------------
-#
-# Load modules.
-#
-#-----------------------------------------------------------------------
-#
-module purge
-
-module use EEEEEE/modulefiles
-module load v8.0.0-jet
-
-#####!/bin/ksh
 ######################################################################
 ####  UNIX Script Documentation Block
 #                      .                                             .
@@ -47,7 +35,7 @@ module load v8.0.0-jet
 dom="conus"
 
 DATA=WWWDDD
-FIXsar=EEEEEE/run_fix
+FIXsar=EEEEEE/fix_am
 cyc=HHHHHH
 INPUT_DATA=$(dirname $DATA)
 

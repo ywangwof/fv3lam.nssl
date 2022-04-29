@@ -1,6 +1,6 @@
 #!/bin/bash
-rootdir="/lfs4/NAGAPE/hpc-wof1/ywang/regional_fv3"
-WORKDIRDF="${rootdir}/run_dirs"
+rootdir="/lfs4/NAGAPE/hpc-wof1/ywang/regional_fv3/fv3lam.nssl"
+WORKDIRDF=$(realpath ${rootdir}/../run_dirs)
 eventdateDF=$(date +%Y%m%d)
 
 #export eventdate="20180214"
@@ -108,102 +108,6 @@ echo "---- Jobs started at $(date +%m-%d_%H:%M:%S) for Event: $eventdate"
 echo "     Working dir: $WORKDIR ----"
 #usage
 
-##-----------------------------------------------------------------------
-##
-## 1. Download EMC IC/BC datasets
-##
-##-----------------------------------------------------------------------
-#
-#  inthour=3
-#  tophour=60
-#  echo "-- 1: download EMC data files at $(date +%m-%d_%H:%M:%S) ----"
-#  emc_dir="${rootdir}/emcic"   #"/fv3sar.${eventdate}/00"
-#
-#  cd ${emc_dir}
-#
-#  emc_event="${emc_dir}/fv3lam.${eventdate}/${CYCLE}"
-#  emcdone="donefile.${eventdate}${CYCLE}"
-#
-#  files=(gfs_ctrl.nc gfs_data.tile7.nc sfc_data.tile7.nc)
-#  for hr in $(seq 0 ${inthour} ${tophour}); do
-#    fhr=$(printf "%03d" $hr)
-#    files+=(gfs_bndy.tile7.${fhr}.nc)
-#  done
-#  files+=(${emcdone})
-#
-#  #
-#  # 1.1 Try public/data directory first
-#  #
-#  publicdatadir="/public/data/grids/ncep/fv3sar"
-#
-#  if [ ! -f ${emc_event}/${emcdone} ]; then
-#
-#    if [[ ! -d ${emc_event} ]]; then
-#      mkdir -p ${emc_event}
-#    fi
-#
-#    currjdate=$(date +%j)
-#    curryyval=$(date +%g)
-#
-#    jdate=$(date -d "$eventdate" +%j)
-#    yyval=$(date -d "$eventdate" +%g)
-#
-#    waitmaxseconds=7200   # wait for at most 1-hour
-#    waitseconds=0;  found=0
-#
-#    readyfile="${publicdatadir}/${yyval}${jdate}0000.donefile.${eventdate}00"
-#    while [[ $waitseconds -lt $waitmaxseconds ]]; do
-#        if [[ -f $readyfile ]]; then
-#            echo "Found $readyfile"
-#            found=1
-#            break
-#        elif [[ $curryyval -eq $yyval && $currjdate -gt $((jdate+1)) ]]; then
-#            break
-#        else
-#            echo "Waiting for $readyfile at ${eventdate} ... "
-#            sleep 20
-#            waitseconds=$(( waitseconds+=20 ))
-#        fi
-#    done
-#
-#    if [[ $found -gt 0 ]]; then
-#      for fn in ${files[@]}; do
-#        echo "Copying $fn ....."
-#        cp -v ${publicdatadir}/${yyval}${jdate}0000.$fn ${emc_event}/$fn
-#      done
-#
-#      #touch ${emc_event}/${emcdone}
-#    fi
-#  fi
-#
-#  #
-#  # 1.2 Try the ftp server if not found in publicdatadir
-#  #
-#  #emcurl="ftp://ftp.emc.ncep.noaa.gov/mmb/mmbpll/fv3sar/fv3sar.${eventdate}/${CYCLE}"
-#  emcurl="ftp://ftp.emc.ncep.noaa.gov/mmb/mmbpll/fv3lam/fv3lam.${eventdate}/${CYCLE}"
-#
-#  if [ ! -f ${emc_event}/${emcdone} ]; then
-#
-#    while true; do
-#
-#      wget -m -nH --cut-dirs=3 ${emcurl}/${emcdone}
-#
-#      if [[ $? -eq 0 ]]; then
-#        break
-#      else
-#        #echo "Waiting for EMC datasets ..."
-#        sleep 10
-#      fi
-#    done
-#
-#    for fn in ${files[@]}; do
-#      echo "Downloading $fn ....."
-#      wget -m -nH --cut-dirs=3 ${emcurl}/$fn > /dev/null 2>&1
-#    done
-#  fi
-#
-#echo " "
-
 #-----------------------------------------------------------------------
 #
 # 0. Prepare working directories
@@ -217,8 +121,7 @@ fi
 
 cd ${eventdir}
 
-emc_dir="${rootdir}/emcic"   #"/fv3sar.${eventdate}/00"
-template_dir="${rootdir}/fv3lam.nssl/run_templates_EMC"
+template_dir="${rootdir}/run_templates_EMC"
 
 intvhour=3
 tophour=60
@@ -236,13 +139,13 @@ diffhour=$(( (currsec-run_sec)/3600 ))
 ##
 ##-----------------------------------------------------------------------
 
-EXEDDD="$rootdir/fv3lam.nssl/exec"
+EXEDDD="$rootdir/exec"
 
 doneics="${eventdir}/INPUT/done.ics"
 if [[ ! -f $doneics ]]; then
 
-    fv3grib2_dir="/public/data/grids/gfs/anl/netcdf"
-    fv3grib2_head=$(date -d "${eventdate} ${CYCLE}:00:00" +%y%j%H%M)
+    fv3netcdf_dir="/public/data/grids/gfs/anl/netcdf"
+    fv3ics_head=$(date -d "${eventdate} ${CYCLE}:00:00" +%y%j%H%M)
     expectedsize=13000000000
 
     if [[ ! -e "${eventdir}/INPUT/tmp_ICS" ]]; then
@@ -253,7 +156,7 @@ if [[ ! -f $doneics ]]; then
     #
     # Wait for atmanl file
     #
-    gfsfile="$fv3grib2_dir/${fv3grib2_head}.gfs.t${CYCLE}z.atmanl.nc"
+    gfsfile="$fv3netcdf_dir/${fv3ics_head}.gfs.t${CYCLE}z.atmanl.nc"
     echo "Waiting for $gfsfile ...."
     while [[ ! -e $gfsfile ]]; do
         sleep 10
@@ -269,7 +172,7 @@ if [[ ! -f $doneics ]]; then
     #
     # Wait for sfcanl file
     #
-    sfcfile="$fv3grib2_dir/${fv3grib2_head}.gfs.t${CYCLE}z.sfcanl.nc"
+    sfcfile="$fv3netcdf_dir/${fv3ics_head}.gfs.t${CYCLE}z.sfcanl.nc"
     expectedsize=340000000
 
     echo "Waiting for $sfcfile ...."
@@ -289,13 +192,14 @@ if [[ ! -f $doneics ]]; then
     #
     # NOTE: cannot run on sjet
     #
-    if [[ $diffhour -lt 2 ]]; then
-      sleep 20
+    if [[ $diffhour -lt 5 ]]; then
+      sleep 20   # for safety while waiting for the file to be written
     fi
 
     jobscript=run_ics_$eventdate${CYCLE}.slurm
     cp ${template_dir}/make_ics.slurm ${jobscript}
     sed -i -e "/WWWDDD/s#WWWDDD#$eventdir/INPUT#;s#EXEDDD#$EXEDDD#;s#DATDDD#${eventdate}${CYCLE}#g;s#DDDHHH#${eventdate:4:4}#g" ${jobscript}
+    sed -i -e "/GFS_INPUT_DIR/s#GFS_INPUT_DIR#$fv3netcdf_dir#" ${jobscript}
 
     echo "sbatch $jobscript"
     sbatch $jobscript
@@ -307,7 +211,7 @@ donelbcs="${eventdir}/INPUT/done.lbcs"
 if [[ ! -f $donelbcs ]]; then
 
     fv3grib2_dir="/public/data/grids/gfs/0p25deg/grib2"
-    fv3grib2_head=$(date -d "${eventdate} ${CYCLE}:00:00" +%y%j%H)
+    fv3lbcs_head=$(date -d "${eventdate} ${CYCLE}:00:00" +%y%j%H)
     expectedsize=700000000
 
     for (( i=intvhour; i<=tophour; i+=intvhour )); do
@@ -317,7 +221,8 @@ if [[ ! -f $donelbcs ]]; then
         fhr2d=$(printf "%02d" "${i}" )
         fhr3d=$(printf "%03d" "${i}" )
 
-        gfsfile="$fv3grib2_dir/${fv3grib2_head}0000${fhr2d}"
+        gfsfile="$fv3grib2_dir/${fv3lbcs_head}0000${fhr2d}"
+        #gfsfile="$fv3grib2_dir/${fv3lbcs_head}.gfs.t00z.atmf${fhr3d}.nc"
 
         echo "Waiting for $gfsfile ...."
         while [[ ! -e $gfsfile ]]; do
@@ -331,7 +236,7 @@ if [[ ! -f $donelbcs ]]; then
             gfssize=$(stat -c %s $(realpath $gfsfile))
         done
 
-        if [[ $diffhour -lt 2 ]]; then
+        if [[ $diffhour -lt 5 ]]; then
           sleep 20
         fi
 
@@ -343,6 +248,7 @@ if [[ ! -f $donelbcs ]]; then
         jobscript=run_lbcs_$eventdate${CYCLE}_${fhr3d}.slurm
         cp ${template_dir}/make_lbcs.slurm ${jobscript}
         sed -i -e "/WWWDDD/s#WWWDDD#$eventdir/INPUT#;s#EXEDDD#$EXEDDD#g;s#DATDDD#${eventdate}${CYCLE}#g;s#HHHNNN#${i}#g;s#DDDHHH#${fhr3d}#g" ${jobscript}
+        sed -i -e "/GFS_INPUT_DIR/s#GFS_INPUT_DIR#$fv3grib2_dir#" ${jobscript}
 
         echo "sbatch $jobscript"
         sbatch $jobscript
@@ -361,6 +267,7 @@ donelbcs_size=$(ls -1 ${eventdir}/INPUT/done.lbcs_* 2>/dev/null | wc -l)
 while [ ${donelbcs_size} -lt ${numhours} ]; do
   echo "Waiting for ${donelbcs}_* (found ${donelbcs_size}) ...."
   sleep 10
+  donelbcs_size=$(ls -1 ${eventdir}/INPUT/done.lbcs_* 2>/dev/null | wc -l)
 done
 touch ${donelbcs}
 
@@ -380,48 +287,32 @@ if [ ! -f $donefv3 ]; then
   echo "-- 2: prepare working directory for FV3SAR at $(date +%m-%d_%H:%M:%S) ----"
 
   cd INPUT
-  ln -s gfs_data.tile7.halo0.nc gfs_data.nc
-  ln -s sfc_data.tile7.halo0.nc sfc_data.nc
+  ln -sf gfs_data.tile7.halo0.nc gfs_data.nc
+  ln -sf sfc_data.tile7.halo0.nc sfc_data.nc
 
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo3.nc     C3359_grid.tile7.halo3.nc
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo4.nc     C3359_grid.tile7.halo4.nc
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo6.nc     C3359_grid.tile7.halo6.nc
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.nc           C3359_grid.tile7.nc
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_grid.tile7.halo4.nc     grid.tile7.halo4.nc
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_oro_data.tile7.halo0.nc C3359_oro_data.tile7.nc
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_oro_data.tile7.halo0.nc oro_data.nc
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_oro_data.tile7.halo4.nc oro_data.tile7.halo4.nc
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359_mosaic.nc               grid_spec.nc
-
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_grid.tile7.halo3.nc     C3359_grid.tile7.halo3.nc
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_grid.tile7.halo4.nc     C3359_grid.tile7.halo4.nc
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_grid.tile7.halo6.nc     C3359_grid.tile7.halo6.nc
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_grid.tile7.nc           C3359_grid.tile7.nc
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_grid.tile7.halo4.nc     grid.tile7.halo4.nc
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_oro_data.tile7.halo0.nc C3359_oro_data.tile7.nc
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_oro_data.tile7.halo0.nc oro_data.nc
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_oro_data.tile7.halo4.nc oro_data.tile7.halo4.nc
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359_mosaic.halo4.nc         grid_spec.nc
+  runfix_ldir="${rootdir}/fix_lam"
+  ln -sf ${rootdir}/fix_lam/C3359_grid.tile7.halo3.nc     C3359_grid.tile7.halo3.nc
+  #ln -s ${rootdir}/fix_lam/C3359_grid.tile7.halo4.nc     C3359_grid.tile7.halo4.nc
+  #ln -s ${rootdir}/fix_lam/C3359_grid.tile7.halo6.nc     C3359_grid.tile7.halo6.nc
+  #ln -s ${rootdir}/fix_lam/C3359_grid.tile7.nc           C3359_grid.tile7.nc
+  ln -sf ${rootdir}/fix_lam/C3359_grid.tile7.halo4.nc     grid.tile7.halo4.nc
+  #ln -s ${rootdir}/fix_lam/C3359_oro_data.tile7.halo0.nc C3359_oro_data.tile7.nc
+  ln -sf ${rootdir}/fix_lam/C3359_oro_data.tile7.halo0.nc oro_data.nc
+  ln -sf ${rootdir}/fix_lam/C3359_oro_data.tile7.halo4.nc oro_data.tile7.halo4.nc
+  ln -sf ${rootdir}/fix_lam/C3359_oro_data_ls.tile7.halo0.nc oro_data_ls.nc
+  ln -sf ${rootdir}/fix_lam/C3359_oro_data_ss.tile7.halo0.nc oro_data_ss.nc
+  ln -sf ${rootdir}/fix_lam/C3359_mosaic.halo3.nc         grid_spec.nc
 
   cd ..
 
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.facsf.tile7.nc                 C3359.facsf.tile1.nc
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.snowfree_albedo.tile7.nc       C3359.snowfree_albedo.tile1.nc
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.substrate_temperature.tile7.nc C3359.substrate_temperature.tile1.nc
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.vegetation_greenness.tile7.nc  C3359.vegetation_greenness.tile1.nc
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.vegetation_type.tile7.nc       C3359.vegetation_type.tile1.nc
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.soil_type.tile7.nc             C3359.soil_type.tile1.nc
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.slope_type.tile7.nc            C3359.slope_type.tile1.nc
-  #ln -s ${emc_dir}/fv3lam_esg.grid.2021/C3359.maximum_snow_albedo.tile7.nc   C3359.maximum_snow_albedo.tile1.nc
-
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.facsf.tile7.nc                 C3359.facsf.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.snowfree_albedo.tile7.nc       C3359.snowfree_albedo.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.substrate_temperature.tile7.nc C3359.substrate_temperature.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.vegetation_greenness.tile7.nc  C3359.vegetation_greenness.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.vegetation_type.tile7.nc       C3359.vegetation_type.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.soil_type.tile7.nc             C3359.soil_type.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.slope_type.tile7.nc            C3359.slope_type.tile1.nc
-  ln -s ${emc_dir}/fv3lam_esg.fixed/C3359.maximum_snow_albedo.tile7.nc   C3359.maximum_snow_albedo.tile1.nc
+  #ln -s ${rootdir}/fix_lam/C3359.facsf.tile7.nc                 C3359.facsf.tile1.nc
+  #ln -s ${rootdir}/fix_lam/C3359.snowfree_albedo.tile7.nc       C3359.snowfree_albedo.tile1.nc
+  #ln -s ${rootdir}/fix_lam/C3359.substrate_temperature.tile7.nc C3359.substrate_temperature.tile1.nc
+  #ln -s ${rootdir}/fix_lam/C3359.vegetation_greenness.tile7.nc  C3359.vegetation_greenness.tile1.nc
+  #ln -s ${rootdir}/fix_lam/C3359.vegetation_type.tile7.nc       C3359.vegetation_type.tile1.nc
+  #ln -s ${rootdir}/fix_lam/C3359.soil_type.tile7.nc             C3359.soil_type.tile1.nc
+  #ln -s ${rootdir}/fix_lam/C3359.slope_type.tile7.nc            C3359.slope_type.tile1.nc
+  #ln -s ${rootdir}/fix_lam/C3359.maximum_snow_albedo.tile7.nc   C3359.maximum_snow_albedo.tile1.nc
 
   mkdir -p RESTART
 
@@ -431,43 +322,57 @@ if [ ! -f $donefv3 ]; then
   cp ${template_dir}/input.nml_${run^^}       input.nml
   cp ${template_dir}/model_configure_${run^^} model_configure
   cp ${template_dir}/nems.configure .
-  if [[ ${run^^} =~ "EMC" ]]; then
-  cp ${template_dir}/suite_FV3_GFS_v15_thompson_mynn_lam3km.xml .
-  elif [[ ${run^^} =~ "NSSL" ]]; then
-      cp ${template_dir}/suite_FV3_RRFS_v1nssl_lsmnoah.xml .
-  else
-      echo "ERROR: unsupport run mode."
-      exit 1
-  fi
 
-  runfix_dir="${rootdir}/fv3lam.nssl/run_fix"
-  #ln -s ${runfix_dir}/global_o3prdlos.f77 .
-  #ln -s ${runfix_dir}/global_h2oprdlos.f77 .
-  ln -s ${runfix_dir}/aerosol.dat .
-  ln -s ${runfix_dir}/solarconstant_noaa_an.txt .
-  ln -s ${runfix_dir}/CFSR.SEAICE.1982.2012.monthly.clim.grb .
-  ln -s ${runfix_dir}/RTGSST.1982.2012.monthly.clim.grb .
-  ln -s ${runfix_dir}/seaice_newland.grb .
-  ln -s ${runfix_dir}/sfc_emissivity_idx.txt .
-  ln -s ${runfix_dir}/co2* .
-  ln -s ${runfix_dir}/global_* .
-  rm global_o3prdlos.f77
-  ln -s ${runfix_dir}/ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77 global_o3prdlos.f77
-  rm global_soilmgldas.t126.384.190.grb
-  ln -s ${runfix_dir}/CCN_ACTIVATE.BIN .
+  #if [[ ${run^^} =~ "EMC" ]]; then
+  #  cp ${template_dir}/suite_FV3_GFS_v15_thompson_mynn_lam3km.xml .
+  #elif [[ ${run^^} =~ "NSSL" ]]; then
+  #  #cp ${template_dir}/suite_FV3_RRFS_v1nssl_lsmnoah.xml .
+  #  cp ${template_dir}/suite_FV3_WoFS_v0ruc.xml .
+  #else
+  #    echo "ERROR: unsupport run mode."
+  #    exit 1
+  #fi
 
+  runfix_dir="${rootdir}/fix_am"
+  ln -sf ${runfix_dir}/fd_nems.yaml                      .
+  for m in $(seq 1 12); do
+    m2str=$(printf "%02d" $m)
+    ln -sf ${runfix_dir}/fix_clim/merra2.aerclim.2003-2014.m${m2str}.nc aeroclim.m${m2str}.nc
+  done
+  ln -sf ${runfix_dir}/global_climaeropac_global.txt aerosol.dat
+
+  for yr in $(seq 2010 2021); do
+    ln -sf ${runfix_dir}/fix_co2_proj/global_co2historicaldata_${yr}.txt co2historicaldata_${yr}.txt
+  done
+  ln -sf ${runfix_dir}/global_co2historicaldata_glob.txt co2historicaldata_glob.txt
+  ln -sf ${runfix_dir}/co2monthlycyc.txt                 .
+  ln -sf ${runfix_dir}/global_albedo4.1x1.grb            .
+  ln -sf ${runfix_dir}/global_h2o_pltc.f77               global_h2oprdlos.f77
+  ln -sf ${runfix_dir}/ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77   global_o3prdlos.f77
+  ln -sf ${runfix_dir}/global_tg3clim.2.6x1.5.grb        .
+  ln -sf ${runfix_dir}/global_zorclim.1x1.grb            .
+
+  ln -sf ${runfix_dir}/fix_clim/optics_BC.v1_3.dat       optics_BC.dat
+  ln -sf ${runfix_dir}/fix_clim/optics_DU.v15_3.dat      optics_DU.dat
+  ln -sf ${runfix_dir}/fix_clim/optics_OC.v1_3.dat       optics_OC.dat
+  ln -sf ${runfix_dir}/fix_clim/optics_SS.v3_3.dat       optics_SS.dat
+  ln -sf ${runfix_dir}/fix_clim/optics_SU.v1_3.dat       optics_SU.dat
+
+  ln -sf ${runfix_dir}/global_sfc_emissivity_idx.txt            sfc_emissivity_idx.txt
+  ln -sf ${runfix_dir}/global_solarconstant_noaa_an.txt         solarconstant_noaa_an.txt
 
   ymd=`echo ${eventdate} |cut -c 1-8`
   yyy=`echo ${eventdate} |cut -c 1-4`
   mmm=`echo ${eventdate} |cut -c 5-6`
   ddd=`echo ${eventdate} |cut -c 7-8`
 
-  sed -i -e "/NPES/s/NPES/${npes}/;/YYYY/s/YYYY/$yyy/;/MM/s/MM/$mmm/;/DD/s/DD/$ddd/" model_configure
+  sed -i -e "/NPES/s/NPES/${npes}/;/YYYY/s/YYYY/$yyy/;/MM/s/MM/${mmm#0}/;/DD/s/DD/${ddd#0}/" model_configure
   sed -i -e "s/NODES2/${quilt_nodes}/;s/PPN2/${quilt_ppn}/;s/TTTTTT/${tophour}/" model_configure
   sed -i -e "/NPES/s/NPES/${npes}/;/YYYY/s/YYYY/$yyy/;/MM/s/MM/$mmm/;/DD/s/DD/$ddd/" diag_table
 
   sed -i -e "/LAYOUT/s/LAYOUTX/${layout_x}/;s/LAYOUTY/${layout_y}/" input.nml
-  sed -i -e "/FIX_AM/s#FIX_AM#${runfix_dir}#"   input.nml
+  sed -i -e "/FIX_AM/s#FIX_AM#${runfix_dir}#;s#FIX_LAM#${runfix_ldir}#"      input.nml
+  sed -i -e "s/BC_UPDATE/$intvhour/"   input.nml
 fi
 
 #-----------------------------------------------------------------------
@@ -478,7 +383,7 @@ fi
 
 echo "-- 3: run FV3SAR at $(date +%m-%d_%H:%M:%S) ----"
 
-EXEPRO="$rootdir/fv3lam.nssl/exec/ufs_model"
+EXEPRO="$rootdir/exec/ufs_model"
 
 if [ ! -f $donefv3 ]; then
   #echo "Waiting for ${chgresfile} ..."
@@ -518,7 +423,7 @@ echo " "
 
 echo "-- 4: run post-processing at $(date +%m-%d_%H:%M:%S) ----"
 
-export FV3SARDIR="${rootdir}/fv3lam.nssl"
+export FV3SARDIR="${rootdir}"
 ${FV3SARDIR}/run_post.sh ${eventdir} ${eventdate} 0 ${tophour} ${run^^}
 
 echo " "

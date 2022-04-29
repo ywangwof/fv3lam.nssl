@@ -12,7 +12,7 @@ nprocs=48
 APRUN="mpiexec -np $nprocs"
 exec_fp="EXEDDD/chgres_cube"
 
-fix_lam="/lfs4/NAGAPE/hpc-wof1/ywang/regional_fv3/emcic/fv3lam_esg.fixed"
+fix_lam="/lfs4/NAGAPE/hpc-wof1/ywang/regional_fv3/fv3lam.nssl/fix_lam"
 #
 #-----------------------------------------------------------------------
 #
@@ -30,7 +30,7 @@ cd $workdir
 
 EXTRN_MDL_CDATE="DATDDD"
 
-fv3grib2_dir="/public/data/grids/gfs/anl/netcdf"
+fv3grib2_dir="GFS_INPUT_DIR"
 fv3grib2_head=$(date -d "${EXTRN_MDL_CDATE:0:8} ${EXTRN_MDL_CDATE:8:2}:00:00" +%y%j%H%M)
 
 #
@@ -64,11 +64,8 @@ cat >fort.41  <<EOF
     mosaic_file_target_grid='${fix_lam}/C3359_mosaic.halo4.nc'
     fix_dir_target_grid='${fix_lam}'
     orog_dir_target_grid='${fix_lam}'
-    orog_files_target_grid="C3359_oro_data.tile7.halo4.nc"
-    vcoord_file_target_grid='${fix_lam}/global_hyblev.l65.txt'
-    mosaic_file_input_grid="NULL"
-    orog_dir_input_grid="NULL"
-    orog_files_input_grid="NULL"
+    orog_files_target_grid='C3359_oro_data.tile7.halo4.nc'
+    vcoord_file_target_grid='${fix_lam}/global_hyblev_fcst_RRFSL65.txt'
     data_dir_input_grid="${fv3grib2_dir}"
     atm_files_input_grid="${fv3grib2_head}.gfs.t${EXTRN_MDL_CDATE:8:2}z.atmanl.nc"
     sfc_files_input_grid="${fv3grib2_head}.gfs.t${EXTRN_MDL_CDATE:8:2}z.sfcanl.nc"
@@ -83,9 +80,23 @@ cat >fort.41  <<EOF
     tracers_input="spfh","clwmr","o3mr","icmr","rwmr","snmr","grle"
     regional=1
     halo_bndy=4
-    halo_blend=10
+    halo_blend=20
+
+    varmap_file = '${fix_lam}/GFSphys_var_map.txt'
+    vgfrc_from_climo  = .true.
+    lai_from_climo  = .true.
+    thomp_mp_climo_file  = '${fix_lam}/Thompson_MP_MONTHLY_CLIMO.nc'
+    sotyp_from_climo  = .true.
+    external_model  = 'FV3GFS'
+    geogrid_file_input_grid  = ''
+    grib2_file_input_grid  = ''
+    minmax_vgfrc_from_climo  = .true.
+    nsoill_out  = 4
+    vgtyp_from_climo  = .true.
+    tg3_from_soil  = .false.
 /
 EOF
+
 #    convert_atm = .true.
 #    convert_nst = .true.
 #    convert_sfc = .true.

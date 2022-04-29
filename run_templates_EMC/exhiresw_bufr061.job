@@ -12,18 +12,6 @@ time1=$(date '+%s')
 echo "Job Started: $(date). Job Id:  $SLURM_JOBID"
 echo " "
 
-#-----------------------------------------------------------------------
-#
-# Load modules.
-#
-#-----------------------------------------------------------------------
-#
-module purge
-
-module use EEEEEE/modulefiles
-module load v8.0.0-jet
-
-#####!/bin/ksh
 ######################################################################
 ####  UNIX Script Documentation Block
 #                      .                                             .
@@ -47,7 +35,7 @@ module load v8.0.0-jet
 dom="conus"
 
 DATA=WWWDDD
-FIXsar=EEEEEE/run_fix
+FIXsar=EEEEEE/fix_am
 cyc=00
 INPUT_DATA=$(dirname $DATA)
 
@@ -219,8 +207,13 @@ echo here RUNLOC $RUNLOC
 echo here MODEL $MODEL
 echo here model $model
 
-nlev=60
+nlev=NNNLEV
 
+if [[ $nlev -ne 65 ]]; then
+    echo "Program \"hireswfv3_sndp.x\" only support nlev=65 because it is hard-coded."
+    echo "Please modify file \"SNDPST_FV3S.f\" in \"hireswfv3_sndp.fd\" and rebuild the program."
+    exit 0
+fi
 #pgmout=hireswfv3_sndp.log
 echo "${model} $nlev" > itag
 ${APRUNS} $EXECfv3/hireswfv3_sndp.x  < itag

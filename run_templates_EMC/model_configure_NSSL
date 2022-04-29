@@ -1,10 +1,10 @@
 total_member:            1
-print_esmf:              .false.
 PE_MEMBER01:             NPES
+print_esmf:              .false.
 start_year:              YYYY
 start_month:             MM
 start_day:               DD
-start_hour:              00
+start_hour:              0
 start_minute:            0
 start_second:            0
 nhours_fcst:             TTTTTT
@@ -15,44 +15,54 @@ cpl:                     .false.
 calendar:                'julian'
 memuse_verbose:          .false.
 atmos_nthreads:          2
-use_hyper_thread:        .false.
-ncores_per_node:         24
-debug_affinity:          .true.
-restart_interval:        0
+restart_interval:        0  -1
 output_1st_tstep_rst:    .false.
-
+write_dopost:            .false.
+ideflate:                0
+nbits:                   0
 quilting:                .true.
+
+#
+# Write-component (quilting) computational parameters.
+#
 write_groups:            NODES2
 write_tasks_per_group:   PPN2
-write_dopost:            .false.
-output_history:          .true.
 num_files:               2
 filename_base:           'dyn''phy'
 output_file:             'netcdf' 'netcdf'
-write_nemsioflip:        .false.
-write_fsyncflag:         .false.
-ideflate:                0
-nbits:                   0
-ichunk2d:                -1
-jchunk2d:                -1
-ichunk3d:                -1
-jchunk3d:                -1
-kchunk3d:                -1
-
+#
+# Write-component output frequency parameter definitions:
+#
+# output_fh: Output frequency in hours.
+# nsout: Output frequency in time steps (positive values override "output_fh").
+#
+output_fh:              1  -1
+nsout:                 -1
+#
+# Coordinate system used by the output grid.
+#
 output_grid:             'lambert_conformal'
-cen_lon:                 -97.5   # central longitude
-cen_lat:                 38.5    # central latitude
+#
+# Parameter definitions for an output grid of type "lambert_conformal":
+#
+# cen_lon: Longitude of center of grid (degrees).
+# cen_lat: Latitude of center of grid (degrees).
+# stdlat1: Latitude of first standard parallel (degrees).
+# stdlat2: Latitude of second standard parallel (degrees).
+# nx: Number of grid cells along x-axis in Lambert conformal (x,y) plane.
+# ny: Number of grid cells along y-axis in Lambert conformal (x,y) plane.
+# lon1: Longitude of center of grid cell at bottom-left corner of grid (degrees).
+# lat1: Latitude of center of grid cell at bottom-left corner of grid (degrees).
+# dx: Grid cell size in x direction (meters).
+# dy: Grid cell size in y direction (meters).
+#
+cen_lon:                -97.5
+cen_lat:                 38.5
 stdlat1:                 38.5
 stdlat2:                 38.5
-nx:                      1799    # number of points along x-axis.
-ny:                      1059    # number of points along y-axis.
-lon1:                    -122.719258     # longitude of lower-left point (in degrees)
-lat1:                    21.138123       # latitude of lower-left point (in degrees)
-dx:                      3000.0  # x-direction grid length
-dy:                      3000.0  # y-direction grid length
-
-nfhout:                  1
-nfhmax_hf:               60
-nfhout_hf:               1
-nsout:                   -1
-
+nx:                     1799
+ny:                     1059
+lon1:                  -122.719258
+lat1:                    21.138123
+dx:                     3000.0
+dy:                     3000.0
