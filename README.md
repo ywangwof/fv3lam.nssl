@@ -1,7 +1,7 @@
 # fv3lam.nssl
-Run configurations for NSSL FV3LAM HWT runs in 2021
+Run configurations for NSSL FV3LAM HWT runs in 2022
 
-Users should copy the following direcotries for executables and fixed files
+## Users should copy the following direcotries for executables and fixed files
 
 * exec/
   - ufs_model
@@ -16,11 +16,21 @@ Users should copy the following direcotries for executables and fixed files
 * fix_lam/
 * UPP_fix/
 
-After clone the repository, users just change "rootdir" in run_fv3_Jet.sh
-to the working repostiory directory.
+## Instructions
+
+After clone the repository, users just
+    1. Change "rootdir" in run_fv3_Jet.sh to your clone directory
+    2. Change "WORKDIRDF" to your fv3 runtime direcotry or specify as command
+       line option.
+    3. Run (preprocessing, UFS forecast and post-processing) for any event date as
+        $> run_fv3_Jet.sh YYYYMMDD [workdir] or
+        $> run_fv3_Jet.sh                    Default of event date is current UTC date
+                                             and work directory is "WORKDIRDF"
 
 
-Source packages in 2022:
+## Notes
+
+Source packages used in 2022 (users do NOT need to copy these packages)
 
 * UPP    #82f3133 (2022-02-15) with local updates for processing NSSL MP products
 

@@ -55,9 +55,10 @@ done
 POSTBUFR_DIR="$RUNDIR/postbufr"
 cd $POSTBUFR_DIR
 hr=$((tophour+1))
+nlevs=65
 bufrtmpl=${FV3SARDIR}/run_templates_EMC/exhiresw_bufr061.job
 jobscript=$POSTBUFR_DIR/exhiresw_bufr0${hr}.job
-sed -e "s#WWWDDD#${POSTBUFR_DIR}#;s#MMMMMM#$MODE#;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;" ${bufrtmpl} > ${jobscript}
+sed -e "s#WWWDDD#${POSTBUFR_DIR}#;s#MMMMMM#$MODE#;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;s#NNNLEV#${nlevs}#;" ${bufrtmpl} > ${jobscript}
 
 wtime=0
 nowait=${#waitlist[@]}
