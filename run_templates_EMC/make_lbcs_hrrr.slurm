@@ -12,7 +12,8 @@ nprocs=48
 APRUN="srun -n $nprocs"
 exec_fp="EXEDDD/chgres_cube"
 
-fix_lam="/lfs4/NAGAPE/hpc-wof1/ywang/regional_fv3/fv3lam.nssl/fix_lam"
+fix_lam="/lfs4/NAGAPE/hpc-wof1/ywang/regional_fv3/fv3lam.nssl/fix_lam_C3356"
+fix_am="/lfs4/NAGAPE/hpc-wof1/ywang/regional_fv3/fv3lam.nssl/fix_am"
 #
 #-----------------------------------------------------------------------
 #
@@ -45,20 +46,20 @@ EXTRN_MDL_CDATE="DATDDD"
 #-----------------------------------------------------------------------
 #
 
-fv3grib2_dir="GFS_INPUT_DIR"
-fv3grib2_head=$(date -d "${EXTRN_MDL_CDATE:0:8} ${EXTRN_MDL_CDATE:8:2}:00:00" +%y%j%H)
+fv3grib2_dir="HRRR_INPUT_DIR"
+fv3grib2_head=$(date -d "${EXTRN_MDL_CDATE:0:8} ${EXTRN_MDL_CDATE:8:2}:00:00" +%y%j%H%M)
 
 #for (( i=${intvlhr}; i<=${numhrs}; i+=${intvlhr} )); do
 #
 # Get the forecast hour of the external model.
 #
-  fhr=$(printf "%02d" ${curhr})
+  fhr=$(printf "%04d" ${curhr})
 #
 # Set external model output file name and file type/format.  Note that
 # these are now inputs into chgres_cube.
 #
   fn_atm=""
-  fn_grib2="${fv3grib2_head}0000${fhr}"
+  fv3grib2_file="${fv3grib2_head}${fhr}"
 #
 # Get the starting date (year, month, and day together), month, day, and
 # hour of the the external model forecast.  Then add the forecast hour
@@ -83,19 +84,20 @@ fv3grib2_head=$(date -d "${EXTRN_MDL_CDATE:0:8} ${EXTRN_MDL_CDATE:8:2}:00:00" +%
   cat >fort.41  <<EOF
 &config
     convert_atm = .true.
-    cycle_day = $((10#${dd}))
-    cycle_hour = $((10#$hh))
-    cycle_mon = $((10#${mm}))
+    cycle_day   = $((10#${dd}))
+    cycle_hour  = $((10#$hh))
+    cycle_mon   = $((10#${mm}))
     data_dir_input_grid = '${fv3grib2_dir}'
-    external_model = 'GFS'
+    external_model = 'HRRR'
+    fix_dir_input_grid = '${fix_am}'
     fix_dir_target_grid = '${fix_lam}'
-    grib2_file_input_grid = '${fn_grib2}'
-    halo_blend = 20
+    grib2_file_input_grid = '${fv3grib2_file}'
+    halo_blend = 10
     halo_bndy = 4
     input_type = 'grib2'
-    mosaic_file_target_grid = '${fix_lam}/C3359_mosaic.halo4.nc'
+    mosaic_file_target_grid = '${fix_lam}/C3356_mosaic.halo4.nc'
     orog_dir_target_grid = '${fix_lam}'
-    orog_files_target_grid = 'C3359_oro_data.tile7.halo4.nc'
+    orog_files_target_grid = 'C3356_oro_data.tile7.halo4.nc'
     regional = 2
     tracers = ''
     tracers_input = ''
@@ -103,6 +105,7 @@ fv3grib2_head=$(date -d "${EXTRN_MDL_CDATE:0:8} ${EXTRN_MDL_CDATE:8:2}:00:00" +%
     vcoord_file_target_grid = '${fix_lam}/global_hyblev_fcst_RRFSL65.txt'
 /
 EOF
+#    halo_blend = 20
 
 #
 #-----------------------------------------------------------------------

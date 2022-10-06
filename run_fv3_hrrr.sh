@@ -115,7 +115,7 @@ echo "     Working dir: $WORKDIR ----"
 #
 #-----------------------------------------------------------------------
 
-eventdir="${WORKDIR}/${eventdate}${CYCLE}"
+eventdir="${WORKDIR}/${eventdate}${CYCLE}_hrrr"
 if [[ ! -r ${eventdir} ]]; then
   mkdir -p ${eventdir}
 fi
@@ -125,16 +125,16 @@ cd ${eventdir}
 template_dir="${rootdir}/run_templates_EMC"
 
 intvhour=3
-tophour=60
+tophour=48
 numhours=$(( tophour/intvhour ))
-gridno="C3359"
-npx=1821
-npy=1093
+gridno="C3356"
+npx=1721
+npy=1025
 
-out_nx="1799"
-out_ny="1059"
-out_lon1="-122.719258"
-out_lat1="21.138123"
+out_nx="1701"
+out_ny="1001"
+out_lon1="-121.566577"
+out_lat1="22.158393"
 
 currsec=$(date +%s)
 run_sec=$(date -d "$eventdate ${CYCLE}:00:00" +%s)
@@ -148,6 +148,7 @@ diffhour=$(( (currsec-run_sec)/3600 ))
 ##-----------------------------------------------------------------------
 
 EXEDDD="$rootdir/exec"
+fv3hrrr_dir="/public/data/grids/hrrr/conus/wrfnat/grib2"
 
 ics_dir="${eventdir}/INPUT"
 doneics="${ics_dir}/done.ics"
@@ -155,9 +156,8 @@ if [[ -f ${ics_dir}/done.ics || -f ${ics_dir}/queue.ics || -f ${ics_dir}/running
     :
 else
 
-    fv3netcdf_dir="/public/data/grids/gfs/anl/netcdf"
     fv3ics_head=$(date -d "${eventdate} ${CYCLE}:00:00" +%y%j%H%M)
-    expectedsize=13000000000
+    expectedsize=670000000
 
     if [[ ! -e "${eventdir}/INPUT/tmp_ICS" ]]; then
         mkdir -p INPUT/tmp_ICS
@@ -167,35 +167,17 @@ else
     #
     # Wait for atmanl file
     #
-    gfsfile="$fv3netcdf_dir/${fv3ics_head}.gfs.t${CYCLE}z.atmanl.nc"
-    echo "Waiting for $gfsfile ...."
-    while [[ ! -e $gfsfile ]]; do
+    hrrrfile="$fv3hrrr_dir/${fv3ics_head}0000"
+    echo "Waiting for $hrrrfile ...."
+    while [[ ! -e $hrrrfile ]]; do
         sleep 10
     done
 
-    gfssize=$(stat -c %s $(realpath $gfsfile))
-    while [[ $gfssize -lt $expectedsize ]]; do
-        echo "Waiting for $gfsfile ($gfssize) ...."
+    hrrrsize=$(stat -c %s $(realpath $hrrrfile))
+    while [[ $hrrrsize -lt $expectedsize ]]; do
+        echo "Waiting for $hrrrfile ($hrrrsize) ...."
         sleep 10
-        gfssize=$(stat -c %s $(realpath $gfsfile))
-    done
-
-    #
-    # Wait for sfcanl file
-    #
-    sfcfile="$fv3netcdf_dir/${fv3ics_head}.gfs.t${CYCLE}z.sfcanl.nc"
-    expectedsize=340000000
-
-    echo "Waiting for $sfcfile ...."
-    while [[ ! -e $sfcfile ]]; do
-        sleep 10
-    done
-
-    sfcsize=$(stat -c %s $(realpath $sfcfile))
-    while [[ $sfcsize -lt $expectedsize ]]; do
-        echo "Waiting for $sfcfile ($sfcsize) ...."
-        sleep 10
-        sfcsize=$(stat -c %s $(realpath $sfcfile))
+        hrrrsize=$(stat -c %s $(realpath $hrrrfile))
     done
 
     #
@@ -208,9 +190,9 @@ else
     fi
 
     jobscript=run_ics_$eventdate${CYCLE}.slurm
-    cp ${template_dir}/make_ics.slurm ${jobscript}
+    cp ${template_dir}/make_ics_hrrr.slurm ${jobscript}
     sed -i -e "/WWWDDD/s#WWWDDD#$eventdir/INPUT#;s#EXEDDD#$EXEDDD#;s#DATDDD#${eventdate}${CYCLE}#g;s#DDDHHH#${eventdate:4:4}#g" ${jobscript}
-    sed -i -e "/GFS_INPUT_DIR/s#GFS_INPUT_DIR#$fv3netcdf_dir#" ${jobscript}
+    sed -i -e "/HRRR_INPUT_DIR/s#HRRR_INPUT_DIR#$fv3hrrr_dir#" ${jobscript}
 
     echo -n "sbatch $jobscript .... "
     sbatch $jobscript
@@ -223,33 +205,31 @@ lbc_dir="${eventdir}/INPUT"
 donelbcs="${lbc_dir}/done.lbcs"
 if [[ ! -f $donelbcs ]]; then
 
-    fv3grib2_dir="/public/data/grids/gfs/0p25deg/grib2"
-    fv3lbcs_head=$(date -d "${eventdate} ${CYCLE}:00:00" +%y%j%H)
+    fv3lbcs_head=$(date -d "${eventdate} ${CYCLE}:00:00" +%y%j%H%M)
     expectedsize=700000000
 
     for (( i=intvhour; i<=tophour; i+=intvhour )); do
 
         cd $eventdir
 
-        fhr2d=$(printf "%02d" "${i}" )
         fhr3d=$(printf "%03d" "${i}" )
+        fhr4d=$(printf "%04d" "${i}" )
 
         if [[ -f ${lbc_dir}/done.lbc_${fhr3d} || -f ${lbc_dir}/queue.lbc_${fhr3d} || -f ${lbc_dir}/running.lbc_${fhr3d} ]]; then
             :
         else
-            gfsfile="$fv3grib2_dir/${fv3lbcs_head}0000${fhr2d}"
-            #gfsfile="$fv3grib2_dir/${fv3lbcs_head}.gfs.t00z.atmf${fhr3d}.nc"
+            hrrrfile="$fv3hrrr_dir/${fv3lbcs_head}${fhr4d}"
 
-            echo "Waiting for $gfsfile ...."
-            while [[ ! -e $gfsfile ]]; do
+            echo "Waiting for $hrrrfile ...."
+            while [[ ! -e $hrrrfile ]]; do
                 sleep 10
             done
 
-            gfssize=$(stat -c %s $(realpath $gfsfile))
-            while [[ $gfssize -lt $expectedsize ]]; do
-                echo "Waiting for $gfsfile ($gfssize) ...."
+            hrrrsize=$(stat -c %s $(realpath $hrrrfile))
+            while [[ $hrrrsize -lt $expectedsize ]]; do
+                echo "Waiting for $hrrrfile ($hrrrsize) ...."
                 sleep 10
-                gfssize=$(stat -c %s $(realpath $gfsfile))
+                hrrrsize=$(stat -c %s $(realpath $hrrrfile))
             done
 
             if [[ $diffhour -lt 5 ]]; then
@@ -262,11 +242,11 @@ if [[ ! -f $donelbcs ]]; then
             cd INPUT/tmp_LBCS_${fhr3d}
 
             jobscript=run_lbcs_$eventdate${CYCLE}_${fhr3d}.slurm
-            cp ${template_dir}/make_lbcs.slurm ${jobscript}
+            cp ${template_dir}/make_lbcs_hrrr.slurm ${jobscript}
             sed -i -e "/WWWDDD/s#WWWDDD#$eventdir/INPUT#;s#EXEDDD#$EXEDDD#g;s#DATDDD#${eventdate}${CYCLE}#g;s#HHHNNN#${i}#g;s#DDDHHH#${fhr3d}#g" ${jobscript}
-            sed -i -e "/GFS_INPUT_DIR/s#GFS_INPUT_DIR#$fv3grib2_dir#" ${jobscript}
+            sed -i -e "/HRRR_INPUT_DIR/s#HRRR_INPUT_DIR#$fv3hrrr_dir#" ${jobscript}
 
-                echo -n "sbatch $jobscript .... "
+            echo -n "sbatch $jobscript .... "
             sbatch $jobscript
             touch ${lbc_dir}/queue.lbc_${fhr3d}
         fi
@@ -310,7 +290,7 @@ else
   ln -sf gfs_data.tile7.halo0.nc gfs_data.nc
   ln -sf sfc_data.tile7.halo0.nc sfc_data.nc
 
-  runfix_ldir="${rootdir}/fix_lam"
+  runfix_ldir="${rootdir}/fix_lam_${gridno}"
   ln -sf ${runfix_ldir}/${gridno}_grid.tile7.halo3.nc          ${gridno}_grid.tile7.halo3.nc
   #ln -s ${runfix_ldir}/${gridno}_grid.tile7.halo4.nc          ${gridno}_grid.tile7.halo4.nc
   #ln -s ${runfix_ldir}/${gridno}_grid.tile7.halo6.nc          ${gridno}_grid.tile7.halo6.nc
@@ -378,8 +358,8 @@ else
   ln -sf ${runfix_dir}/fix_clim/optics_SS.v3_3.dat       optics_SS.dat
   ln -sf ${runfix_dir}/fix_clim/optics_SU.v1_3.dat       optics_SU.dat
 
-  ln -sf ${runfix_dir}/global_sfc_emissivity_idx.txt     sfc_emissivity_idx.txt
-  ln -sf ${runfix_dir}/global_solarconstant_noaa_an.txt  solarconstant_noaa_an.txt
+  ln -sf ${runfix_dir}/global_sfc_emissivity_idx.txt            sfc_emissivity_idx.txt
+  ln -sf ${runfix_dir}/global_solarconstant_noaa_an.txt         solarconstant_noaa_an.txt
 
   ymd=`echo ${eventdate} |cut -c 1-8`
   yyy=`echo ${eventdate} |cut -c 1-4`
@@ -421,7 +401,7 @@ else
 
   jobscript=run_fv3sar_$eventdate${CYCLE}.slurm
   cp ${template_dir}/run_on_Jet_EMC.job ${jobscript}
-  sed -i -e "/WWWDDD/s#WWWDDD#$eventdir#;s#EXEPPP#$EXEPRO#;s#NPES#${npes}#;s#MODE#${run}#g" ${jobscript}
+  sed -i -e "/WWWDDD/s#WWWDDD#$eventdir#;s#EXEPPP#$EXEPRO#;s#NPES#${npes}#;s#MODE#${run}_hrrr#g" ${jobscript}
   #sed -i -e "/WWWDDD/s#WWWDDD#$eventdir#;s#EXEPPP#$EXEPRO#;s#NNNNNN#${nodes1}#;s#PPPPP1#${platppn}#g;s#MMMMMM#${nodes2}#;s#PPPPP2#${quilt_ppn}#g" ${jobscript}
 
   #module load slurm

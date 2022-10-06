@@ -60,9 +60,9 @@ cen_lon:                -97.5
 cen_lat:                 38.5
 stdlat1:                 38.5
 stdlat2:                 38.5
-nx:                     1799
-ny:                     1059
-lon1:                  -122.719258
-lat1:                    21.138123
-dx:                     3000.0
-dy:                     3000.0
+nx:                      NOX
+ny:                      NOY
+lon1:                    OLON1
+lat1:                    OLAT1
+dx:                      3000.0
+dy:                      3000.0

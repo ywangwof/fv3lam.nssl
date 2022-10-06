@@ -9,7 +9,7 @@
 #SBATCH -e WWWDDD/tmp_ICS/err.make_ics_%j
 
 nprocs=48
-APRUN="mpiexec -np $nprocs"
+APRUN="srun -n $nprocs"
 exec_fp="EXEDDD/chgres_cube"
 
 fix_lam="/lfs4/NAGAPE/hpc-wof1/ywang/regional_fv3/fv3lam.nssl/fix_lam"
@@ -27,6 +27,9 @@ if [[ ! -e $workdir ]]; then
     mkdir -p $workdir
 fi
 cd $workdir
+
+rm -f ${ics_dir}/error.ics ${ics_dir}/queue.ics
+touch ${ics_dir}/running.ics
 
 EXTRN_MDL_CDATE="DATDDD"
 
@@ -162,5 +165,8 @@ if [[ $? -eq 0 ]]; then
 
     touch ${ics_dir}/done.ics
 else
+    touch ${ics_dir}/error.ics
     echo "ERROR: $?"
 fi
+
+rm -f ${ics_dir}/running.ics
