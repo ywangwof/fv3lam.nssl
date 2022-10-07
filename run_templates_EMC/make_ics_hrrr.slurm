@@ -77,7 +77,7 @@ cat >fort.41  <<EOF
     fix_dir_target_grid = '${fix_lam}'
     geogrid_file_input_grid = '${fix_lam}/geo_em.d01.nc_HRRRX'
     grib2_file_input_grid = '${fv3grib2_file}'
-    halo_blend = 10
+    halo_blend = 20
     halo_bndy = 4
     input_type = 'grib2'
     lai_from_climo = .true.

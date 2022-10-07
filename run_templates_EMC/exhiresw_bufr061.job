@@ -59,6 +59,10 @@ TITLE="fv3MMMMMM"
 #mkdir -p $DATA/postbufr
 cd $DATA
 
+fhrstr=$(printf "%03d" $((FHRLIM+1)) )
+rm -f $DATA/queue.postbufr_$fhrstr $DATA/running.postbufr_$fhrstr
+touch $DATA/running.postbufr_$fhrstr
+
 RUNLOC=${NEST}${MODEL}
 
 #numprocess=$((PPPPPP*NNNNNN))
@@ -296,4 +300,12 @@ tar -czvf ../${bufrfilename}.tar.gz *
 
 echo "Done hireswfv3_stnmlist.x & hireswfv3_stnmlist.x"
 echo EXITING $0 with return code $err
+
+if [[ $err -eq 0 ]]; then
+    touch $DATA/done.postbufr_$fhrstr
+else
+    touch $DATA/error.postbufr_$fhrstr
+fi
+rm -f $DATA/running.postbufr_$fhrstr
+
 exit $err

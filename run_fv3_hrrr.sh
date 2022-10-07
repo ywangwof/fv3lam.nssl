@@ -429,7 +429,7 @@ echo " "
 echo "-- 4: run post-processing at $(date +%m-%d_%H:%M:%S) ----"
 
 export FV3SARDIR="${rootdir}"
-${FV3SARDIR}/run_post.sh ${eventdir} ${eventdate} 0 ${tophour} ${run^^}
+${FV3SARDIR}/run_post.sh ${eventdir} ${eventdate} 0 ${tophour} ${run^^}_hrrr
 
 echo " "
 

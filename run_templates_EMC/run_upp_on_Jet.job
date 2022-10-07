@@ -23,6 +23,9 @@ numprocess=$((PPPPPP*NNNNNN))
 export APRUN="srun -n $numprocess"
 export OMP_NUM_THREADS=TTTTTT
 
+CDATE="DDDDDD"
+fhr="HHHHHH"
+
 UPPEXE=EEEEEE/exec
 
 #-----------------------------------------------------------------------
@@ -33,6 +36,12 @@ UPPEXE=EEEEEE/exec
 
 cd WWWDDD
 
+uppdir=$(dirname WWWDDD)
+
+fhrstr=$(printf "%03d" $fhr )
+rm -f $uppdir/queue.upp_$fhrstr $uppdir/running.upp_$fhrstr
+touch $uppdir/running.upp_$fhrstr
+
 ${APRUN} ${UPPEXE}/upp.x < itag
 
 #-----------------------------------------------------------------------
@@ -41,9 +50,6 @@ ${APRUN} ${UPPEXE}/upp.x < itag
 # script.
 #
 #-----------------------------------------------------------------------
-
-CDATE="DDDDDD"
-fhr="HHHHHH"
 
 cyc="00"
 tmmark="grib2"
@@ -83,9 +89,13 @@ mv BGDAWP.GrbF${fhr2} ../${gribfilename}
 #mv NATLEV.GrbF${fhr2} ../${gribfilename}
 
 if [[ -f ../${gribfilename} ]]; then
-  #touch ../${NET}.t${cyc}z.postf${fhr3}.${tmmark}_ready
-  touch ../${gribfilename}_ready
+    #touch ../${NET}.t${cyc}z.postf${fhr3}.${tmmark}_ready
+    touch ../${gribfilename}_ready
+    touch $uppdir/done.upp_$fhrstr
+else
+    touch $uppdir/error.upp_$fhrstr
 fi
+rm -f $uppdir/running.upp_$fhrstr
 
 #-----------------------------------------------------------------------
 #
