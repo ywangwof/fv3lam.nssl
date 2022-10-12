@@ -43,6 +43,9 @@ sfhr=${3-0}
 tophour=${4-60}
 MODE=${5-EMC}
 
+do_bufr=1
+if [[ $MODE == "NSSL_hrrr" ]]; then do_bufr=0; fi
+
 nodes1="2"
 numprocess="12"
 numthread="4"
@@ -217,72 +220,76 @@ EOF
 #
 #-----------------------------------------------------------------------
 
-    if [[ -f ${POSTBUFR_DIR}/done.postbufr_$fhr || -f ${POSTBUFR_DIR}/queue.postbufr_$fhr || -f ${POSTBUFR_DIR}/running.postbufr_$fhr ]]; then
-        :
-    else
+    if [[ $do_bufr -eq 1 ]]; then
+        if [[ -f ${POSTBUFR_DIR}/done.postbufr_$fhr || -f ${POSTBUFR_DIR}/queue.postbufr_$fhr || -f ${POSTBUFR_DIR}/running.postbufr_$fhr ]]; then
+            :
+        else
 
-        FHR_DIR="${POSTBUFR_DIR}/$fhr"
-        if [[ ! -r ${FHR_DIR} ]]; then
-          mkdir -p ${FHR_DIR}
+            FHR_DIR="${POSTBUFR_DIR}/$fhr"
+            if [[ ! -r ${FHR_DIR} ]]; then
+              mkdir -p ${FHR_DIR}
+            fi
+
+            cd ${FHR_DIR}
+
+            jobscript=${FHR_DIR}/exhiresw_bufr${fhr}.job
+
+            sed -e "s#WWWDDD#$FHR_DIR#;s#MMMMMM#$MODE#g;s#NNNNNN#${nodesb}#;s#PPPPPP#${platppnb}#g;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;" ${bufrtmpl} > ${jobscript}
+
+            echo -n "Submitting $jobscript ..."
+            sbatch $jobscript
+            touch ${POSTBUFR_DIR}/queue.postbufr_$fhr
         fi
-
-        cd ${FHR_DIR}
-
-        jobscript=${FHR_DIR}/exhiresw_bufr${fhr}.job
-
-        sed -e "s#WWWDDD#$FHR_DIR#;s#MMMMMM#$MODE#g;s#NNNNNN#${nodesb}#;s#PPPPPP#${platppnb}#g;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;" ${bufrtmpl} > ${jobscript}
-
-        echo -n "Submitting $jobscript ..."
-        sbatch $jobscript
-        touch ${POSTBUFR_DIR}/queue.postbufr_$fhr
     fi
     waitlist+=($fhr)
 done
 
-cd $POSTBUFR_DIR
-hr=$((tophour+1))
-nlevs=65
-bufrtmpl=${FV3SARDIR}/run_templates_EMC/exhiresw_bufr061.job
-jobscript=$POSTBUFR_DIR/exhiresw_bufr0${hr}.job
-sed -e "s#WWWDDD#${POSTBUFR_DIR}#;s#MMMMMM#$MODE#g;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;s#NNNLEV#${nlevs}#;" ${bufrtmpl} > ${jobscript}
+if [[ $do_bufr -eq 1 ]]; then
+    cd $POSTBUFR_DIR
+    hr=$((tophour+1))
+    nlevs=65
+    bufrtmpl=${FV3SARDIR}/run_templates_EMC/exhiresw_bufr061.job
+    jobscript=$POSTBUFR_DIR/exhiresw_bufr0${hr}.job
+    sed -e "s#WWWDDD#${POSTBUFR_DIR}#;s#MMMMMM#$MODE#g;s#EEEEEE#${FV3SARDIR}#;s#DDDDDD#${CDATE}#;s#HHHHHH#${hr}#;s#HHHTOP#${tophour}#;s#NNNLEV#${nlevs}#;" ${bufrtmpl} > ${jobscript}
 
-fhr=$(printf "%03d" $hr)
-if [[ -f ${POSTBUFR_DIR}/done.postbufr_$fhr || -f ${POSTBUFR_DIR}/queue.postbufr_$fhr || -f ${POSTBUFR_DIR}/running.postbufr_$fhr ]]; then
-    :
-else
-    wtime=0
-    nowait=${#waitlist[@]}
-    while true; do
-        for fhr in ${waitlist[@]}; do
-            donefile=$POSTBUFR_DIR/sndpostdone${fhr}.tm00
+    fhr=$(printf "%03d" $hr)
+    if [[ -f ${POSTBUFR_DIR}/done.postbufr_$fhr || -f ${POSTBUFR_DIR}/queue.postbufr_$fhr || -f ${POSTBUFR_DIR}/running.postbufr_$fhr ]]; then
+        :
+    else
+        wtime=0
+        nowait=${#waitlist[@]}
+        while true; do
+            for fhr in ${waitlist[@]}; do
+                donefile=$POSTBUFR_DIR/sndpostdone${fhr}.tm00
 
-            if [[ -e $donefile ]]; then
-                waitlist=("${waitlist[@]/$fhr}")
-                nowait=$((nowait-1))
-            else
-                echo "Waiting ($wtime seconds) for ${donefile}"
+                if [[ -e $donefile ]]; then
+                    waitlist=("${waitlist[@]/$fhr}")
+                    nowait=$((nowait-1))
+                else
+                    echo "Waiting ($wtime seconds) for ${donefile}"
+                fi
+            done
+            if [[ ${nowait} -eq 0 ]]; then
+                break
             fi
+            sleep 20
+            wtime=$(( wtime += 20 ))
         done
-        if [[ ${nowait} -eq 0 ]]; then
-            break
-        fi
-        sleep 20
-        wtime=$(( wtime += 20 ))
-    done
 
-    #echo "tophour=$tophour"
-    #fhr=$(printf "%03d" $tophour)
-    #donefile=$POSTBUFR_DIR/sndpostdone${fhr}.tm00
-    #wtime=0
-    #while [[ ! -f ${donefile} ]]; do
-    #  sleep 20
-    #  wtime=$(( wtime += 10 ))
-    #  echo "Waiting ($wtime seconds) for ${donefile}"
-    #done
+        #echo "tophour=$tophour"
+        #fhr=$(printf "%03d" $tophour)
+        #donefile=$POSTBUFR_DIR/sndpostdone${fhr}.tm00
+        #wtime=0
+        #while [[ ! -f ${donefile} ]]; do
+        #  sleep 20
+        #  wtime=$(( wtime += 10 ))
+        #  echo "Waiting ($wtime seconds) for ${donefile}"
+        #done
 
-    echo -n "Submitting $jobscript ..."
-    sbatch $jobscript
-    touch $POSTBUFR_DIR/queue.postbufr_$fhr
+        echo -n "Submitting $jobscript ..."
+        sbatch $jobscript
+        touch $POSTBUFR_DIR/queue.postbufr_$fhr
+    fi
 fi
 
 exit 0
